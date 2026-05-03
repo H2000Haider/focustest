@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>الاختبار التفاعلي - BFE11</title>
+<title>الاختبار التفاعلي - BAE5</title>
 <style>
     body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
     .container { max-width: 800px; margin: auto; border: 2px solid #f1c40f; padding: 30px; border-radius: 15px; background-color: #1e1e1e; }
@@ -23,7 +23,7 @@
 <div class="container">
 
     <div id="page1">
-        <h2>حيل شركات الأغذية لزيادة الاستهلاك</h2>
+        <h2>اختيار التمارين والزوايا</h2>
         <p>الرجاء إدخال الاسم الثلاثي للبدء:</p>
         <input type="text" id="userName" placeholder="الاسم الثلاثي...">
         <div id="nameError" style="color: #e74c3c; margin-top: 10px; font-weight: bold;"></div>
@@ -41,7 +41,7 @@
         <h2>شاهد الفيديو التعليمي</h2>
         <p>يجب مشاهدة الفيديو بتركيز قبل الانتقال للمحاولة التالية</p>
         <br>
-        <a href="https://drive.google.com/file/d/1fJiPPZQNQ1pep0SzBiU2xBgzudNkdHIw/view?usp=drive_link"
+        <a href="https://drive.google.com/file/d/1awwg1xM_QvKV2t2CP81l2-UsmHjotlF2/view?usp=drive_link"
            target="_blank" class="btn" onclick="setTimeout(() => showNextAfterVideo(), 2000);">فتح رابط المشاهدة</a>
     </div>
 
@@ -66,7 +66,7 @@
 </div>
 
 <script>
-const allQuestions = [{"id": 1, "question": "ما مشكلة التركيز؟", "correct": "قلق زائد", "options": ["قلق زائد", "نوم أفضل", "فقدان وزن", "زيادة عضل"]}, {"id": 2, "question": "كم استخدموا المتتبع؟", "correct": "واحد وعشرون بالمئة", "options": ["واحد وعشرون بالمئة", "نصف السكان", "خمسة بالمئة", "الجميع"]}, {"id": 3, "question": "ما اسم الهوس؟", "correct": "أورثوسومنيا", "options": ["أورثوسومنيا", "أرق عابر", "كيتو", "اكتئاب"]}, {"id": 4, "question": "ماذا يسبب؟", "correct": "مشاكل نوم أكثر", "options": ["مشاكل نوم أكثر", "شفاء كامل", "طاقة أكبر", "فقدان شهية"]}];
+const allQuestions = [{"id": 1, "question": "ما هي القاعدة الأساسية لاختيار التمارين؟", "correct": "لا يوجد صح وغلط", "options": ["لا يوجد صح وغلط", "يجب استهداف كل الزوايا", "الالتزام بالأجهزة المعقدة فقط", "تقليد برامج المحترفين"]}, {"id": 2, "question": "كيف يؤثر تمرين الصدر المستوي على العلوي؟", "correct": "يبني الجزء العلوي أيضاً", "options": ["يبني الجزء العلوي أيضاً", "يهمل الجزء العلوي تماماً", "يضعف نمو الصدر كلياً", "يمنع تضخم العضلات"]}, {"id": 3, "question": "ما مقدار تحفيز العلوي مقارنة بالمستوي؟", "correct": "فارق بسيط جداً", "options": ["فارق بسيط جداً", "فارق شاسع جداً", "لا يوجد فارق", "تفوق كامل للعلوي"]}, {"id": 4, "question": "ما هو المعيار الأهم عند اختيار تمرينك؟", "correct": "التمارين التي تعجبك", "options": ["التمارين التي تعجبك", "أصعب الحركات المتاحة", "أحدث الأجهزة بالنادي", "عدد السعرات المحروقة"]}, {"id": 5, "question": "متى تصبح الزوايا المختلفة ضرورة قصوى؟", "correct": "بطولات كمال الأجسام", "options": ["بطولات كمال الأجسام", "بداية ممارسة الرياضة", "خسارة الوزن الزائد", "فترات التنشيف فقط"]}];
 let currentAttempt = 1;
 let userName = "";
 let correctAnswersGlobal = new Set();

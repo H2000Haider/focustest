@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>الاختبار التفاعلي - BFE11</title>
+<title>الاختبار التفاعلي - BFD4</title>
 <style>
     body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
     .container { max-width: 800px; margin: auto; border: 2px solid #f1c40f; padding: 30px; border-radius: 15px; background-color: #1e1e1e; }
@@ -23,7 +23,7 @@
 <div class="container">
 
     <div id="page1">
-        <h2>حيل شركات الأغذية لزيادة الاستهلاك</h2>
+        <h2>أزمة المهاجرين وتعقيدات السياسة الداخلية</h2>
         <p>الرجاء إدخال الاسم الثلاثي للبدء:</p>
         <input type="text" id="userName" placeholder="الاسم الثلاثي...">
         <div id="nameError" style="color: #e74c3c; margin-top: 10px; font-weight: bold;"></div>
@@ -41,7 +41,7 @@
         <h2>شاهد الفيديو التعليمي</h2>
         <p>يجب مشاهدة الفيديو بتركيز قبل الانتقال للمحاولة التالية</p>
         <br>
-        <a href="https://drive.google.com/file/d/1fJiPPZQNQ1pep0SzBiU2xBgzudNkdHIw/view?usp=drive_link"
+        <a href="https://drive.google.com/file/d/17BmEtYwRLAN0Q4PuHZ9-frJWNfSaKOm7/view?usp=drive_link"
            target="_blank" class="btn" onclick="setTimeout(() => showNextAfterVideo(), 2000);">فتح رابط المشاهدة</a>
     </div>
 
@@ -66,7 +66,7 @@
 </div>
 
 <script>
-const allQuestions = [{"id": 1, "question": "ما مشكلة التركيز؟", "correct": "قلق زائد", "options": ["قلق زائد", "نوم أفضل", "فقدان وزن", "زيادة عضل"]}, {"id": 2, "question": "كم استخدموا المتتبع؟", "correct": "واحد وعشرون بالمئة", "options": ["واحد وعشرون بالمئة", "نصف السكان", "خمسة بالمئة", "الجميع"]}, {"id": 3, "question": "ما اسم الهوس؟", "correct": "أورثوسومنيا", "options": ["أورثوسومنيا", "أرق عابر", "كيتو", "اكتئاب"]}, {"id": 4, "question": "ماذا يسبب؟", "correct": "مشاكل نوم أكثر", "options": ["مشاكل نوم أكثر", "شفاء كامل", "طاقة أكبر", "فقدان شهية"]}];
+const allQuestions = [{"id": 1, "question": "ماذا سمح كاسترو به عام 1980؟", "correct": "هجرة مؤقتة جماعية", "options": ["هجرة مؤقتة جماعية", "إصلاح دستوري شامل", "انتخابات حرة مباشرة", "تحالف سوفييتي جديد"]}, {"id": 2, "question": "إلى أين وصل المهاجرون الكوبيون؟", "correct": "فلوريدا الأمريكية", "options": ["فلوريدا الأمريكية", "المكسيك الجنوبية", "الاتحاد السوفييتي", "كندا الشرقية"]}, {"id": 3, "question": "لماذا أراد كلينتون إنهاء النزاع؟", "correct": "زوال التهديد الكوبي", "options": ["زوال التهديد الكوبي", "تصاعد النفوذ السوفييتي", "انهيار الاقتصاد الأمريكي", "نجاح الثورة الكوبية"]}, {"id": 4, "question": "من عارض رفع الحصار؟", "correct": "الكوبيون الأمريكيون المعارضون", "options": ["الكوبيون الأمريكيون المعارضون", "الجيش السوفييتي السابق", "حلفاء باتيستا القدامى", "الحكومات الأوروبية"]}, {"id": 5, "question": "ما سبب تراجع كلينتون؟", "correct": "إسقاط طائرتين مدنيتين", "options": ["إسقاط طائرتين مدنيتين", "غزو أمريكي مباشر", "أزمة صواريخ جديدة", "تمرد داخلي واسع"]}];
 let currentAttempt = 1;
 let userName = "";
 let correctAnswersGlobal = new Set();
