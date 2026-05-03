@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>الاختبار التفاعلي - BFE11</title>
+<style>
+    body { background-color: #121212; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; padding: 20px; }
+    .container { max-width: 800px; margin: auto; border: 2px solid #f1c40f; padding: 30px; border-radius: 15px; background-color: #1e1e1e; }
+    h1, h2 { color: #f1c40f; }
+    .btn { background-color: #f1c40f; color: #000; border: none; padding: 12px 25px; font-size: 18px; cursor: pointer; border-radius: 5px; margin-top: 20px; font-weight: bold; transition: 0.3s; }
+    .btn:hover { background-color: #d4ac0d; }
+    .option-btn { display: block; width: 100%; margin: 10px 0; padding: 12px; background: #333; color: white; border: 1px solid #f1c40f; border-radius: 5px; cursor: pointer; text-align: right; font-size: 16px; }
+    .option-btn:hover { background: #444; }
+    .option-btn.selected { border-color: #fff; background-color: #f1c40f; color: #000; }
+    .hidden { display: none; }
+    .timer { font-size: 24px; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
+    input[type="text"] { padding: 12px; width: 80%; border-radius: 5px; border: 1px solid #f1c40f; font-size: 16px; background: #222; color: white; }
+    .results-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .results-table th, .results-table td { border: 1px solid #f1c40f; padding: 10px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="container">
+
+    <div id="page1">
+        <h2>حيل شركات الأغذية لزيادة الاستهلاك</h2>
+        <p>الرجاء إدخال الاسم الثلاثي للبدء:</p>
+        <input type="text" id="userName" placeholder="الاسم الثلاثي...">
+        <div id="nameError" style="color: #e74c3c; margin-top: 10px; font-weight: bold;"></div>
+        <button class="btn" onclick="startQuiz()">ابدأ الاختبار</button>
+    </div>
+
+    <div id="quizPage" class="hidden">
+        <h2 id="attemptTitle"></h2>
+        <div class="timer" id="timer">00:00</div>
+        <div id="questionContainer"></div>
+        <button class="btn hidden" id="nextBtn" onclick="submitAttempt()">تأكيد الإجابات</button>
+    </div>
+
+    <div id="videoPage" class="hidden">
+        <h2>شاهد الفيديو التعليمي</h2>
+        <p>يجب مشاهدة الفيديو بتركيز قبل الانتقال للمحاولة التالية</p>
+        <br>
+        <a href="https://drive.google.com/file/d/1fJiPPZQNQ1pep0SzBiU2xBgzudNkdHIw/view?usp=drive_link"
+           target="_blank" class="btn" onclick="setTimeout(() => showNextAfterVideo(), 2000);">فتح رابط المشاهدة</a>
+    </div>
+
+    <div id="resultsPage" class="hidden">
+        <h1>النتائج النهائية</h1>
+        <p id="finalName" style="font-size: 20px; font-weight: bold;"></p>
+        <p>تاريخ الاختبار: May 03, 2026</p>
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>المحاولة</th>
+                    <th>النتيجة</th>
+                    <th>النسبة المئوية</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+        <h2 id="totalScore"></h2>
+        <button class="btn" onclick="location.reload()">إعادة الاختبار</button>
+    </div>
+
+</div>
+
+<script>
+const allQuestions = [{"id": 1, "question": "ما مشكلة التركيز؟", "correct": "قلق زائد", "options": ["قلق زائد", "نوم أفضل", "فقدان وزن", "زيادة عضل"]}, {"id": 2, "question": "كم استخدموا المتتبع؟", "correct": "واحد وعشرون بالمئة", "options": ["واحد وعشرون بالمئة", "نصف السكان", "خمسة بالمئة", "الجميع"]}, {"id": 3, "question": "ما اسم الهوس؟", "correct": "أورثوسومنيا", "options": ["أورثوسومنيا", "أرق عابر", "كيتو", "اكتئاب"]}, {"id": 4, "question": "ماذا يسبب؟", "correct": "مشاكل نوم أكثر", "options": ["مشاكل نوم أكثر", "شفاء كامل", "طاقة أكبر", "فقدان شهية"]}];
+let currentAttempt = 1;
+let userName = "";
+let correctAnswersGlobal = new Set();
+let scores = [];
+let timerInterval;
+let currentQuestions = [];
+let userSelections = {};
+
+function startTimer(seconds, callback) {
+    let timeLeft = seconds;
+    const timerDisplay = document.getElementById('timer');
+    clearInterval(timerInterval);
+
+    timerInterval = setInterval(() => {
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        timerDisplay.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            callback();
+        }
+
+        timeLeft--;
+    }, 1000);
+}
+
+function startQuiz() {
+    userName = document.getElementById('userName').value.trim();
+
+    if (userName.split(' ').length < 3) {
+        document.getElementById('nameError').innerText = "يرجى إدخال الاسم ثلاثياً على الأقل.";
+        return;
+    }
+
+    showPage('quizPage');
+    setupAttempt1();
+}
+
+function setupAttempt1() {
+    document.getElementById('attemptTitle').innerText = "المحاولة 1 - سؤال تمهيدي";
+    currentQuestions = [allQuestions[2]];
+    renderQuestions(currentQuestions);
+    startTimer(30, submitAttempt);
+}
+
+function setupAttempt2() {
+    document.getElementById('attemptTitle').innerText = "المحاولة 2 - الأسئلة المتبقية";
+    currentQuestions = allQuestions.filter(q => !correctAnswersGlobal.has(q.id));
+    renderQuestions(currentQuestions);
+    startTimer(300, submitAttempt);
+}
+
+function setupAttempt3() {
+    document.getElementById('attemptTitle').innerText = "المحاولة 3 - الفرصة الأخيرة";
+    currentQuestions = allQuestions.filter(q => !correctAnswersGlobal.has(q.id));
+    renderQuestions(currentQuestions);
+    startTimer(300, submitAttempt);
+}
+
+function renderQuestions(questions) {
+    const container = document.getElementById('questionContainer');
+    container.innerHTML = "";
+    userSelections = {};
+
+    questions.forEach((q, idx) => {
+        const qDiv = document.createElement('div');
+        qDiv.style.marginBottom = "30px";
+        qDiv.innerHTML = `<p><strong>${idx + 1}. ${q.question}</strong></p>`;
+
+        let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
+
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "option-btn";
+            btn.innerText = opt;
+
+            btn.onclick = () => {
+                qDiv.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                userSelections[q.id] = (opt === q.correct);
+            };
+
+            qDiv.appendChild(btn);
+        });
+
+        container.appendChild(qDiv);
+    });
+
+    document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+function submitAttempt() {
+    clearInterval(timerInterval);
+    let correctCount = 0;
+
+    for (let qId in userSelections) {
+        if (userSelections[qId]) {
+            correctCount++;
+            correctAnswersGlobal.add(parseInt(qId));
+        }
+    }
+
+    scores.push({
+        attempt: currentAttempt,
+        correct: correctCount,
+        total: currentQuestions.length
+    });
+
+    if (currentAttempt < 3 && correctAnswersGlobal.size < allQuestions.length) {
+        currentAttempt++;
+        showPage('videoPage');
+    } else {
+        showResults();
+    }
+}
+
+function showNextAfterVideo() {
+    showPage('quizPage');
+
+    if (currentAttempt === 2) {
+        setupAttempt2();
+    } else if (currentAttempt === 3) {
+        setupAttempt3();
+    }
+}
+
+function showPage(pageId) {
+    ['page1', 'quizPage', 'videoPage', 'resultsPage'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+    });
+
+    document.getElementById(pageId).classList.remove('hidden');
+}
+
+function showResults() {
+    showPage('resultsPage');
+    document.getElementById('finalName').innerText = "الاسم: " + userName;
+
+    const tbody = document.getElementById('resultsBody');
+    tbody.innerHTML = "";
+
+    let totalCorrect = 0;
+
+    scores.forEach(s => {
+        const percent = ((s.correct / s.total) * 100).toFixed(1);
+
+        tbody.innerHTML += `<tr><td>${s.attempt}</td><td>${s.correct} من ${s.total}</td><td>${percent}%</td></tr>`;
+        totalCorrect += s.correct;
+    });
+
+    const finalScore = (totalCorrect / 5).toFixed(2);
+
+    document.getElementById('totalScore').innerText =
+        `الإجمالي النهائي (الصحيح ÷ 5): ${finalScore}`;
+}
+</script>
+
+</body>
+</html>
