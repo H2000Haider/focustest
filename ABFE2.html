@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>فوائد حمية البحر المتوسط السريعة</title>
+    <style>
+        body { background-color: black; color: white; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        .yellow { color: yellow; }
+        .card { background: #111; border: 1px solid yellow; padding: 20px; margin: 20px auto; max-width: 600px; border-radius: 10px; }
+        input[type="text"] { width: 80%; padding: 10px; margin: 10px 0; background: #222; color: white; border: 1px solid yellow; }
+        button { background-color: yellow; color: black; border: none; padding: 15px 30px; font-size: 18px; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .timer { font-size: 24px; color: yellow; position: fixed; top: 10px; left: 10px; }
+        .option-label { display: block; background: #222; margin: 10px 0; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 18px; transition: 0.3s; border: 1px solid transparent; }
+        .option-label:hover { border-color: yellow; }
+        input[type="radio"] { display: none; }
+        input[type="radio"]:checked + span { color: yellow; font-weight: bold; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">05:00</div>
+    <!-- إضافة id للعنوان العلوي للتحكم في ظهوره -->
+    <h2 class="yellow" id="main-topic-header">فوائد حمية البحر المتوسط السريعة</h2>
+
+    <div id="page1" class="page card">
+        <h3>أدخل اسمك الثلاثي للمتابعة</h3>
+        <input type="text" id="username" placeholder="الاسم الثلاثي...">
+        <p id="name-error" class="yellow hidden">يجب إدخال 3 كلمات على الأقل</p>
+        <br><button onclick="nextPage(1)">ابدأ الاختبار</button>
+    </div>
+
+    <div id="page2" class="page card hidden">
+        <p id="blank-question-text"></p>
+        <div id="blank-inputs"></div>
+        <button onclick="nextPage(2)">تحقق وانتقل</button>
+    </div>
+
+    <div id="page3" class="page card hidden">
+        <h3 id="intro-q-text"></h3>
+        <div id="intro-options"></div>
+        <button onclick="nextPage(3)">التالي</button>
+    </div>
+
+    <div id="page4" class="page card hidden">
+        <h3 class="yellow">استمع جيدًا</h3>
+        <a href="https://drive.google.com/drive/folders/1iZjavA6P9YEGfk6cXHqbt5MtWcWWIYG-" target="_blank" style="color:white;">اضغط هنا لفتح الرابط</a>
+        <br><br><button onclick="nextPage(4)">موافق، ابدأ الأسئلة</button>
+    </div>
+
+    <div id="page5" class="page card hidden">
+        <div id="main-questions-container"></div>
+        <button onclick="nextPage(5)">إنهاء المحاولة</button>
+    </div>
+
+    <div id="page6" class="page card hidden">
+        <h3 class="yellow">تنبيه: توجد أخطاء. استمع مجددًا</h3>
+        <a href="https://drive.google.com/drive/folders/1iZjavA6P9YEGfk6cXHqbt5MtWcWWIYG-" target="_blank" style="color:white;">رابط المراجعة</a>
+        <br><br><button onclick="nextPage(6)">المحاولة الأخيرة</button>
+    </div>
+
+    <div id="page7" class="page card hidden">
+        <div id="final-questions-container"></div>
+        <button onclick="nextPage(7)">النتيجة النهائية</button>
+    </div>
+
+    <div id="page8" class="page card hidden">
+        <h1 class="yellow">النتيجة النهائية</h1>
+        <h2 id="final-score"></h2>
+        <p id="completion-date"></p>
+    </div>
+
+    <script>
+        const rawData = [{"id": 1, "text": "ما النظام الغذائي الأكثر دراسة في النص؟", "correct": "النظام المتوسطي", "options": ["النظام المتوسطي", "النظام الكيتوني", "النظام النباتي", "النظام العشوائي"]}, {"id": 2, "text": "ما نوع فقدان الوزن المرتبط بالنجاح طويل المدى؟", "correct": "فقدان سريع", "options": ["فقدان سريع", "فقدان بطيء", "زيادة وزن", "ثبات وزن"]}, {"id": 3, "text": "ما التركيب الغذائي المرتبط بالإدمان الغذائي؟", "correct": "كربوهيدرات دهون", "options": ["كربوهيدرات دهون", "بروتين دهون", "سكر ملح", "ألياف ماء"]}, {"id": 4, "text": "ما نتيجة النظام المتوسطي الصحي؟", "correct": "تقليل أمراض", "options": ["تقليل أمراض", "زيادة أمراض", "عدم تأثير", "نتائج سلبية"]}, {"id": 5, "text": "ما سبب سمعة الحميات السريعة قديماً؟", "correct": "بروتين ضعيف", "options": ["بروتين ضعيف", "بروتين قوي", "دهون عالية", "سكر مرتفع"]}];
+        let currentPage = 1;
+        let timeLeft = 300;
+        let score = 0;
+        let introCorrect = false;
+        let firstAttemptDone = false;
+
+        function startTimer() {
+            const timerDisplay = document.getElementById('timer');
+            const interval = setInterval(() => {
+                let mins = Math.floor(timeLeft / 60);
+                let secs = timeLeft % 60;
+                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                if (timeLeft <= 0) {
+                    timeLeft = 300; // Reset timer for each page logic if desired
+                } else {
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function setupBlankPage() {
+            const topic = "فوائد حمية البحر المتوسط السريعة";
+            const words = topic.split(' ');
+            let indices = [];
+            while(indices.length < 2) {
+                let r = Math.floor(Math.random() * words.length);
+                if(!indices.includes(r)) indices.push(r);
+            }
+            indices.sort((a,b)=>a-b);
+
+            let html = "";
+            words.forEach((w, i) => {
+                if(indices.includes(i)) {
+                    html += `<input type="text" class="blank-in" data-ans="${w}" style="width:80px"> `;
+                } else {
+                    html += w + " ";
+                }
+            });
+            document.getElementById('blank-question-text').innerHTML = "أكمل الفراغات بالكلمات الصحيحة من عنوان الموضوع:";
+            document.getElementById('blank-inputs').innerHTML = html;
+        }
+
+        function renderOptions(q, containerId, namePrefix) {
+            const container = document.getElementById(containerId);
+            container.innerHTML += `<p class="yellow">${q.text}</p>`;
+            const shuffled = shuffle([...q.options]);
+            shuffled.forEach(opt => {
+                container.innerHTML += `
+                    <label class="option-label">
+                        <input type="radio" name="${namePrefix}${q.id}" value="${opt}">
+                        <span>${opt}</span>
+                    </label>
+                `;
+            });
+        }
+
+        function nextPage(current) {
+            const mainHeader = document.getElementById('main-topic-header');
+
+            if(current === 1) {
+                const name = document.getElementById('username').value.trim();
+                if(name.split(' ').length < 3) {
+                    document.getElementById('name-error').classList.remove('hidden');
+                    return;
+                }
+                setupBlankPage();
+                // إخفاء العنوان عند الانتقال لصفحة الفراغات
+                mainHeader.classList.add('hidden');
+            }
+
+            if(current === 2) {
+                const ins = document.querySelectorAll('.blank-in');
+                let allCorrect = true;
+                ins.forEach(i => { if(i.value.trim() !== i.getAttribute('data-ans')) allCorrect = false; });
+                if(!allCorrect) { alert("الإجابة غير صحيحة، حاول مجدداً"); return; }
+
+                // إعادة إظهار العنوان عند مغادرة صفحة الفراغات
+                mainHeader.classList.remove('hidden');
+
+                // Setup Intro Q (Q3)
+                const q3 = rawData.find(q => q.id === 3);
+                document.getElementById('intro-q-text').textContent = q3.text;
+                renderOptions(q3, 'intro-options', 'intro');
+            }
+
+            if(current === 3) {
+                const q3 = rawData.find(q => q.id === 3);
+                const selected = document.querySelector('input[name="intro3"]:checked');
+                if(selected && selected.value === q3.correct) introCorrect = true;
+                timeLeft = 300;
+            }
+
+            if(current === 4) {
+                const mainContainer = document.getElementById('main-questions-container');
+                mainContainer.innerHTML = "";
+                rawData.forEach(q => {
+                    if(introCorrect && q.id === 3) return;
+                    renderOptions(q, 'main-questions-container', 'main');
+                });
+                timeLeft = 300;
+            }
+
+            if(current === 5) {
+                score = calculateScore('main');
+                if(score < 5) {
+                    currentPage = 6;
+                } else {
+                    currentPage = 8;
+                    showFinalResult();
+                }
+            }
+
+            if(current === 6) {
+                const finalContainer = document.getElementById('final-questions-container');
+                finalContainer.innerHTML = "";
+                rawData.forEach(q => renderOptions(q, 'final-questions-container', 'last'));
+                timeLeft = 300;
+            }
+
+            if(current === 7) {
+                score = calculateScore('last');
+                currentPage = 8;
+                showFinalResult();
+            }
+
+            if(currentPage !== 8) {
+                document.getElementById('page' + current).classList.add('hidden');
+                currentPage = (current === 5 && score < 5) ? 6 : current + 1;
+                document.getElementById('page' + currentPage).classList.remove('hidden');
+            }
+        }
+
+        function calculateScore(prefix) {
+            let s = 0;
+            if(prefix === 'main' && introCorrect) s = 1;
+            rawData.forEach(q => {
+                if(prefix === 'main' && introCorrect && q.id === 3) return;
+                const sel = document.querySelector(`input[name="${prefix}${q.id}"]:checked`);
+                if(sel && sel.value === q.correct) s++;
+            });
+            return s;
+        }
+
+        function showFinalResult() {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById('main-topic-header').classList.remove('hidden'); // تأكيد ظهور العنوان في النتيجة
+            document.getElementById('page8').classList.remove('hidden');
+            document.getElementById('final-score').textContent = `درجتك: ${score} من 5`;
+            document.getElementById('completion-date').textContent = "تاريخ الانتهاء: " + new Date().toLocaleString('ar-EG');
+        }
+
+        window.onload = startTimer;
+    </script>
+</body>
+</html>
