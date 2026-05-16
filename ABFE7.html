@@ -2,489 +2,537 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>الهوس المعاصر بالأجهزة الرقمية لتتبع جودة النوم</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الاختبار الذكي الموحد</title>
     <style>
-        body {{
-            background-color: #000000;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        /* إعدادات خطوط وألوان ثابتة بالكامل تمنع التكبير والزوم */
+        * {
+            box-sizing: border-box;
+            -webkit-text-size-adjust: none; /* حظر زوم الخطوط تلقائياً في الموبايل */
+            touch-action: manipulation;
+        }
+
+        body {
             margin: 0;
+            padding: 0;
+            background-color: #000000; /* لون أساسي أسود 60% من مساحة التوزيع */
+            color: #ffffff; /* الخط أبيض */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: block;
+        }
+
+        /* الحاوية المركزية الطولية الثابتة الحجم بالكامل */
+        .main-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #000000;
+            border-left: 4px solid #ffcc00; /* لمسة اللون الأصفر 30% مع العناصر الاخرى */
+            border-right: 4px solid #ffcc00;
             padding: 20px;
-            display: block;
-        }}
-        .container {{
-            max-width: 800px;
-            margin: 40px auto;
-            background-color: #111111;
-            padding: 30px;
-            border-radius: 8px;
-            border: 1px solid #333333;
-        }}
-        .timer-bar {{
-            color: #ffff00;
-            font-size: 18px;
-            font-weight: bold;
-            text-align: left;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .header-panel {
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 2px solid #ffcc00;
             margin-bottom: 20px;
-            border-bottom: 1px solid #222222;
-            padding-bottom: 10px;
-        }}
-        .page-panel {{
-            display: none;
-        }}
-        .page-panel.active {{
-            display: block;
-        }}
-        h1, h2, h3 {{
-            color: #ffffff;
-        }}
-        .highlight-yellow {{
-            color: #ffff00;
-        }}
-        .btn-next {{
-            background-color: #ffff00;
+        }
+
+        /* إعدادات العداد التنازلي الثابت ممركزا */
+        .timer-box {
+            background-color: #ffcc00;
             color: #000000;
-            border: none;
-            padding: 12px 30px;
-            font-size: 16px;
             font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-top: 20px;
-            display: inline-block;
-            width: auto;
-        }}
-        .btn-next:hover {{
-            background-color: #e6e600;
-        }}
-        .input-text {{
+            font-size: 18px;
+            padding: 8px;
+            text-align: center;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .page-section {
+            display: none; /* يتم التحكم بالظهور عبر جافاسكريبت */
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        h1, h2, h3 {
+            color: #ffcc00; /* العناوين باللون الأصفر الثابت */
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        /* حقول الإدخال المحمية ضد الزوم بالموبايل (حجم الخط لا يقل عن 16px يمنع زوم الآيفون) */
+        input[type="text"] {
             width: 100%;
             padding: 12px;
-            background-color: #222222;
-            border: 1px solid #444444;
+            font-size: 16px; 
+            border: 2px solid #ffcc00;
+            background-color: #111111;
             color: #ffffff;
-            font-size: 16px;
-            border-radius: 4px;
-            box-sizing: border-box;
-            margin-top: 10px;
-        }}
-        .input-text:focus {{
-            border-color: #ffff00;
+            border-radius: 5px;
             outline: none;
-        }}
-        .question-block {{
-            margin-bottom: 25px;
-            background: #1a1a1a;
+        }
+
+        input[type="text"]:focus {
+            border-color: #ffffff;
+        }
+
+        /* تصميم خيارات مريحة وكبيرة تمنع الحاجة لأزرار الراديو الصغيرة */
+        .option-card {
+            background-color: #1a1a1a;
+            border: 2px solid #ffcc00;
             padding: 15px;
-            border-radius: 6px;
-        }}
-        /* الغاء الازرار الصغيرة واعتماد نظام كروت خيارات مريحة وكبيرة */
-        .choices-container {{
-            display: block;
-            margin-top: 10px;
-        }}
-        .choice-card {{
-            background-color: #222222;
-            border: 1px solid #444444;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 4px;
+            margin-bottom: 12px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
-        }}
-        .choice-card:hover {{
-            border-color: #ffff00;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-card:hover {
             background-color: #2a2a2a;
-        }}
-        .choice-card.selected {{
-            background-color: #ffff00;
+        }
+
+        .option-card.selected {
+            background-color: #ffcc00;
             color: #000000;
-            border-color: #ffff00;
             font-weight: bold;
-        }}
-        .error-msg {{
-            color: #ff3333;
-            margin-top: 10px;
-            font-weight: bold;
-            display: none;
-        }}
-        .blank-input {{
-            display: inline-block;
-            width: 130px;
-            padding: 4px;
-            background-color: #222222;
-            border: 1px solid #ffff00;
-            color: #ffffff;
-            text-align: center;
-            border-radius: 4px;
-            margin: 0 5px;
-        }}
-        a.listen-link {{
-            color: #ffff00;
+        }
+
+        /* أزرار الانتقال الكبيرة والانسيابية جداً */
+        .nav-btn {
+            width: 100%;
+            background-color: #ffcc00;
+            color: #000000;
+            border: none;
+            padding: 15px;
             font-size: 18px;
-            text-decoration: underline;
             font-weight: bold;
-        }}
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: #e6b800;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .audio-link-box {
+            background-color: #111;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px dashed #ffcc00;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .audio-link-box a {
+            color: #ffcc00;
+            font-size: 16px;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        .fill-blank-text {
+            font-size: 18px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+
+        .blank-input {
+            display: inline-block;
+            width: 150px;
+            margin: 0 5px;
+            padding: 5px;
+            font-size: 16px;
+            border-bottom: 2px solid #ffcc00;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            background: transparent;
+            color: #ffcc00;
+            text-align: center;
+        }
+
+        .error-msg {
+            color: #ff3333;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="timer-bar" id="timerContainer">الوقت المتبقي للصفحة: <span id="timeLeft">05:00</span></div>
+<div class="main-container">
+    <div class="timer-box">الوقت المتبقي لهذه الصفحة: <span id="countdown">05:00</span></div>
 
-    <div class="page-panel active" id="page1">
-        <h2>مرحباً بك في الاختبار التقييمي</h2>
-        <p>يرجى إدخال الاسم الثلاثي الكريم للمتابعة والبدء:</p>
-        <input type="text" id="userFullName" class="input-text" placeholder="اكتب اسمك الثلاثي هنا...">
-        <div class="error-msg" id="page1Error">الرجاء إدخال الاسم الثلاثي كاملاً للمتابعة!</div>
-        <button class="btn-next" onclick="validateAndGoToPage2()">الانتقال للصفحة التالية</button>
-    </div>
-
-    <div class="page-panel" id="page2">
-        <h3>عنوان الموضوع الحالي:</h3>
-        <h1 class="highlight-yellow">الهوس المعاصر بالأجهزة الرقمية لتتبع جودة النوم</h1>
-        <button class="btn-next" onclick="goToPage3()">ابدأ التدقيق والتحدي التالي</button>
-    </div>
-
-    <div class="page-panel" id="page3">
-        <h3>امتداداً للعنوان السابق، املأ الفراغات النصية بدقة للانتقال:</h3>
-        <div style="font-size: 22px; line-height: 1.8; margin: 30px 0;" id="fillBlanksContainer">
-            </div>
-        <div class="error-msg" id="page3Error">الإدخال غير صحيح! يجب ملء الفراغات بالكلمات المفقودة الصحيحة تماماً للانتقال.</div>
-        <button class="btn-next" onclick="validateAndGoToPage4()">تحقق والانتقال للصفحة 4</button>
-    </div>
-
-    <div class="page-panel" id="page4">
-        <h3>سؤال تمهيدي للموضوع:</h3>
-        <div id="preliminaryQuestionContainer"></div>
-        <button class="btn-next" onclick="goToPage5()">تأكيد الإجابة والانتقال للصفحة 5</button>
-    </div>
-
-    <div class="page-panel" id="page5">
-        <h3>المسار السمعي الداعم:</h3>
-        <p>الرجاء الضغط على الرابط أدناه ومراجعة المصدر بتمعن:</p>
-        <p style="margin: 30px 0;">
-            <a href="https://drive.google.com/file/d/1cvkyZj5D2Kq0ubZr1V72ikNAPTNdw8nO/view?usp=drive_link" target="_blank" class="listen-link">استمع جيداً</a>
-        </p>
-        <button class="btn-next" onclick="goToPage6()">الانتقال لصفحة الأسئلة الكاملة</button>
-    </div>
-
-    <div class="page-panel" id="page6">
-        <h3>حزمة الأسئلة العامة للموضوع:</h3>
-        <div id="mainQuestionsContainer"></div>
-        <button class="btn-next" onclick="processPage6Answers()">إنهاء الإجابات والانتقال للصفحة 7</button>
-    </div>
-
-    <div class="page-panel" id="page7">
-        <h3>مراجعة استماعية مخصصة:</h3>
-        <p>بناءً على إجاباتك السابقة، يتوفر لك الرابط للاستماع مرة أخرى والتركيز على النقاط التي تحتاج تعزيزاً:</p>
-        <p style="margin: 30px 0;">
-            <a href="https://drive.google.com/file/d/1cvkyZj5D2Kq0ubZr1V72ikNAPTNdw8nO/view?usp=drive_link" target="_blank" class="listen-link">استمع جيداً</a>
-        </p>
-        <button class="btn-next" onclick="goToPage8()">الانتقال للمحاولة الأخيرة</button>
-    </div>
-
-    <div class="page-panel" id="page8">
-        <h3>المحاولة الأخيرة لتصحيح الإجابات:</h3>
-        <div id="reviewQuestionsContainer"></div>
-        <button class="btn-next" onclick="processPage8Answers()">اعتماد النتيجة النهائية والذهاب لصفحة النتيجة</button>
-    </div>
-
-    <div class="page-panel" id="page9">
-        <h1 class="highlight-yellow">تم اكتمال الاختبار بنجاح</h1>
-        <div style="font-size: 20px; margin-top: 20px; line-height: 1.6;">
-            <p>مرحباً بك عزيزي: <span id="resName" class="highlight-yellow"></span></p>
-            <p>النتيجة الإجمالية المحققة: <span id="resScore" style="font-size: 28px; font-weight: bold;" class="highlight-yellow">0</span> من 5</p>
-            <p>تاريخ ووقت الانتهاء: <span id="resTimestamp" style="color: #aaaaaa;"></span></p>
+    <div id="page1" class="page-section active">
+        <h2>مرحباً بك في الاختبار</h2>
+        <div class="form-group" style="margin-top: 40px;">
+            <label style="display:block; margin-bottom: 10px; font-size:16px;">الرجاء إدخال الاسم الثلاثي كاملاً لبدء الاختبار:</label>
+            <input type="text" id="user-fullname" placeholder="اكتب اسمك الثلاثي هنا..." autocomplete="off">
+            <div id="p1-error" class="error-msg">حقل الاسم الثلاثي الزامي ومطلوب بالكامل للانتقال!</div>
         </div>
+        <button class="nav-btn" onclick="goToPage2()">ابدأ الاختبار الآن</button>
     </div>
+
+    <div id="page2" class="page-section">
+        <h3>موضوع الاختبار الرئيسي</h3>
+        <div style="margin: 50px 0; font-size: 22px; text-align: center; font-weight: bold; color: #ffffff;">
+            الهوس المعاصر بالأجهزة الرقمية لتتبع جودة النوم
+        </div>
+        <button class="nav-btn" onclick="nextPage(3)">الانتقال للصفحة التالية</button>
+    </div>
+
+    <div id="page3" class="page-section">
+        <h3>املاً الفراغات التالية بدقة</h3>
+        <p style="font-size: 14px; color: #aaa; text-align: center;">(يجب ملء الفراغات بالكلمات المحذوفة الصحيحة تماماً للانتقال)</p>
+        <div class="fill-blank-text" id="blank-container">
+            </div>
+        <div id="p3-error" class="error-msg">الرجاء إدخال الإجابات الصحيحة للفراغات لتتمكن من العبور!</div>
+        <button class="nav-btn" onclick="validatePage3()">التحقق والانتقال</button>
+    </div>
+
+    <div id="page4" class="page-section">
+        <h3 id="q3-title-p4">سؤال تمهيدي مهم</h3>
+        <div id="q3-options-p4" style="margin-top: 20px;">
+            </div>
+        <button class="nav-btn" onclick="submitPage4()">تقديم الإجابة التمهيدية</button>
+    </div>
+
+    <div id="page5" class="page-section">
+        <h3>الملف الصوتي والمرجعي</h3>
+        <div class="audio-link-box">
+            <p style="font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #ffcc00;">استمع جيدًا</p>
+            <p>قم بزيارة الرابط المرفق للاستماع والاطلاع قبل بدء الأسئلة الكاملة:</p>
+            <a href="https://drive.google.com/file/d/1cvkyZj5D2Kq0ubZr1V72ikNAPTNdw8nO/view?usp=drive_link" target="_blank">https://drive.google.com/file/d/1cvkyZj5D2Kq0ubZr1V72ikNAPTNdw8nO/view?usp=drive_link</a>
+        </div>
+        <button class="nav-btn" onclick="nextPage(6)">لقد استمعت، الانتقال للأسئلة</button>
+    </div>
+
+    <div id="page6" class="page-section">
+        <h3>مجموعة الأسئلة الكاملة</h3>
+        <div id="full-questions-container">
+            </div>
+        <button class="nav-btn" onclick="submitPage6()">إنهاء وإرسال الإجابات</button>
+    </div>
+
+    <div id="page7" class="page-section">
+        <h3>مراجعة للملف الصوتي</h3>
+        <div class="audio-link-box">
+            <p style="font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #ffcc00;">استمع جيدًا (محاولة مراجعة)</p>
+            <a href="https://drive.google.com/file/d/1cvkyZj5D2Kq0ubZr1V72ikNAPTNdw8nO/view?usp=drive_link" target="_blank">https://drive.google.com/file/d/1cvkyZj5D2Kq0ubZr1V72ikNAPTNdw8nO/view?usp=drive_link</a>
+        </div>
+        <button class="nav-btn" onclick="nextPage(8)">الانتقال للمحاولة الأخيرة</button>
+    </div>
+
+    <div id="page8" class="page-section">
+        <h3>المحاولة الأخيرة للأسئلة المتعثرة</h3>
+        <div id="wrong-questions-container">
+            </div>
+        <button class="nav-btn" onclick="submitPage8()">تقديم المحاولة الأخيرة</button>
+    </div>
+
+    <div id="page9" class="page-section text-center">
+        <h2>نهاية الاختبار</h2>
+        <div style="background-color: #111; padding: 30px; border-radius: 8px; border: 2px solid #ffcc00; margin-top: 30px;">
+            <p style="font-size: 18px;">المتدرب/ـة: <span id="res-name" style="color: #ffcc00; font-weight: bold;">-</span></p>
+            <p style="font-size: 24px; margin: 20px 0;">النتيجة الإجمالية الكاملة: <span id="res-score" style="color: #ffcc00; font-weight: bold;">0</span> / 5</p>
+            <p style="font-size: 14px; color: #aaa; margin-top: 25px;">تاريخ ووقت إتمام الاختبار الكترونياً:</p>
+            <p id="res-date" style="font-size: 16px; font-weight: bold; color: #ffffff;">-</p>
+        </div>
+        <button class="nav-btn" onclick="window.location.reload()">إعادة الاختبار من جديد</button>
+    </div>
+
 </div>
 
 <script>
-// تخزين المعطيات المهيكلة في مصفوفة جافاسكريبت
-const rawQuestionsData = [{"id": 1, "question": "ما تأثير القلق من النوم على النوم نفسه؟", "correct": "يزيد مشاكل النوم", "choices": ["يزيد مشاكل النوم", "يحسن جودة النوم", "يوقف النوم تماماً", "لا يؤثر إطلاقاً"]}, {"id": 2, "question": "ما نسبة مستخدمي أجهزة تتبع النوم تقريباً؟", "correct": "حوالي واحد وعشرين", "choices": ["حوالي واحد وعشرين", "حوالي عشرة بالمئة", "حوالي خمسون بالمئة", "حوالي خمسة بالمئة"]}, {"id": 3, "question": "ما الهدف من تحذيرات النوم المثالي؟", "correct": "زيادة الوعي الصحي", "choices": ["زيادة الوعي الصحي", "منع النوم نهائياً", "تقليل ساعات النوم", "إلغاء أهمية النوم"]}, {"id": 4, "question": "ما التوصية الأساسية لمن يعاني من الأرق؟", "correct": "زيارة الطبيب أولاً", "choices": ["زيارة الطبيب أولاً", "زيادة السهر ليلاً", "تجنب النوم نهائياً", "استخدام منومات فقط"]}, {"id": 5, "question": "ما فائدة العلاج السلوكي المعرفي للأرق؟", "correct": "فعّال جداً بدون أدوية", "choices": ["فعّال جداً بدون أدوية", "غير فعّال إطلاقاً دائماً", "يعتمد على الأدوية فقط", "يزيد القلق دائماً"]}];
-const originalTopic = "الهوس المعاصر بالأجهزة الرقمية لتتبع جودة النوم";
+    // تمرير البيانات المجهزة بالكامل من البايثون ككائن جافاسكريبت ثابت ومحمي
+    const quizData = [{"id": 1, "question": "ما تأثير القلق من النوم على النوم نفسه؟", "options": ["يزيد مشاكل النوم", "يحسن جودة النوم", "يوقف النوم تماماً", "لا يؤثر إطلاقاً"], "correct": "يزيد مشاكل النوم"}, {"id": 2, "question": "ما نسبة مستخدمي أجهزة تتبع النوم تقريباً؟", "options": ["حوالي واحد وعشرين", "حوالي عشرة بالمئة", "حوالي خمسون بالمئة", "حوالي خمسة بالمئة"], "correct": "حوالي واحد وعشرين"}, {"id": 3, "question": "ما الهدف من تحذيرات النوم المثالي؟", "options": ["زيادة الوعي الصحي", "منع النوم نهائياً", "تقليل ساعات النوم", "إلغاء أهمية النوم"], "correct": "زيادة الوعي الصحي"}, {"id": 4, "question": "ما التوصية الأساسية لمن يعاني من الأرق؟", "options": ["زيارة الطبيب أولاً", "زيادة السهر ليلاً", "تجنب النوم نهائياً", "استخدام منومات فقط"], "correct": "زيارة الطبيب أولاً"}, {"id": 5, "question": "ما فائدة العلاج السلوكي المعرفي للأرق؟", "options": ["فعّال جداً بدون أدوية", "غير فعّال إطلاقاً دائماً", "يعتمد على الأدوية فقط", "يزيد القلق دائماً"], "correct": "فعّال جداً بدون أدوية"}];
+    const topicText = "الهوس المعاصر بالأجهزة الرقمية لتتبع جودة النوم";
 
-let userName = "";
-let timerInterval = null;
-let timeLeftSeconds = 300; // 5 دقائق لكل صفحة
+    let userName = "";
+    let currentPage = 1;
+    let timerInterval = null;
+    let timeLeft = 300; // 5 دقائق بالثواني لكل صفحة
 
-// كائنات لتتبع حالة الإجابات
-let selectedAnswers = {{}}; // كائن يحفظ إجابات المستخدم الحالية
-let isQuestion3CorrectInPage4 = false;
-let wrongQuestionIds = []; // تتبع المعرفات الخاطئة بعد الصفحة 6
+    // حفظ حالة إجابات المستخدم
+    let userAnswers = {}; // id -> الوجابة المختارة
+    let q3PreCorrect = false; // هل إجابة السؤال الثالث التمهيدي صحيحة؟
+    let wrongOnPage6 = []; // مصفوفة لحفظ المعرفات الخاطئة في الصفحة 6 ليتم تكرارها
 
-// دالة شافل مخصصة لخلط الخيارات مصفوفة
-function shuffleArray(array) {{
-    let cur = array.length, rand;
-    while (cur !== 0) {{
-        rand = Math.floor(Math.random() * cur);
-        cur--;
-        [array[cur], array[rand]] = [array[rand], array[cur]];
-    }}
-    return array;
-}}
-
-// بدء وإعادة تشغيل العداد 5 دقائق وتجديده بعد كل صفحة
-function startPageTimer() {{
-    clearInterval(timerInterval);
-    timeLeftSeconds = 300;
-    updateTimerDisplay();
-    timerInterval = setInterval(() => {{
-        timeLeftSeconds--;
+    // دالة إدارة العداد التنازلي وتجديده التلقائي لكل صفحة جديدة
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 300; 
         updateTimerDisplay();
-        if (timeLeftSeconds <= 0) {{
-            clearInterval(timerInterval);
-            // الانتقال التلقائي السلس عند انتهاء الوقت دون عرقلة
-            handleTimerExpiry();
-        }}
-    }}, 1000);
-}}
 
-function updateTimerDisplay() {{
-    let mins = Math.floor(timeLeftSeconds / 60);
-    let secs = timeLeftSeconds % 60;
-    document.getElementById("timeLeft").innerText = 
-        (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
-}}
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleTimeOut();
+            }
+        }, 1000);
+    }
 
-function handleTimerExpiry() {{
-    let activePageId = document.querySelector('.page-panel.active').id;
-    if (activePageId === "page1") {{
-        validateAndGoToPage2();
-    }} else if (activePageId === "page2") {{
-        goToPage3();
-    }} else if (activePageId === "page3") {{
-        // المضي قدماً تلقائياً
-        goToPage4();
-    }} else if (activePageId === "page4") {{
-        goToPage5();
-    }} else if (activePageId === "page5") {{
-        goToPage6();
-    }} else if (activePageId === "page6") {{
-        processPage6Answers();
-    }} else if (activePageId === "page7") {{
-        goToPage8();
-    }} else if (activePageId === "page8") {{
-        processPage8Answers();
-    }}
-}}
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const seconds = (timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('countdown').innerText = `${minutes}:${seconds}`;
+    }
 
-// إدارة النقل الفعلي بين الصفحات والتحكم برؤيتها وسلاستها
-function switchPage(nextPageId) {{
-    document.querySelectorAll('.page-panel').forEach(panel => {{
-        panel.classList.remove('active');
-    }});
-    document.getElementById(nextPageId).classList.add('active');
-    startPageTimer();
-}}
+    function handleTimeOut() {
+        alert("انتهى الوقت المخصص لهذه الصفحة! سيتم نقلك تلقائياً.");
+        if (currentPage === 1) {
+            userName = document.getElementById('user-fullname').value.trim() || "مشارك غير مسجل";
+            nextPage(2);
+        } else if (currentPage === 3) {
+            // تخطي حماية الصفحة 3 بالقيم الحالية عند انتهاء الوقت قسراً
+            nextPage(4);
+        } else if (currentPage === 4) {
+            submitPage4();
+        } else if (currentPage === 6) {
+            submitPage6();
+        } else if (currentPage === 8) {
+            submitPage8();
+        } else {
+            let next = currentPage + 1;
+            if (next <= 9) nextPage(next);
+        }
+    }
 
-// الصفحة 1
-function validateAndGoToPage2() {{
-    let nameInput = document.getElementById("userFullName").value.trim();
-    if (nameInput.length < 5) {{
-        document.getElementById("page1Error").style.display = "block";
-        return;
-    }}
-    document.getElementById("page1Error").style.display = "none";
-    userName = nameInput;
-    switchPage("page2");
-}}
+    // تشغيل المؤقت للصفحة الأولى فوراً عند التحميل
+    window.onload = function() {
+        startTimer();
+        setupPage3Blank();
+        setupPage4Pre();
+    };
 
-// الصفحة 2
-let word1Correct = "";
-let word2Correct = "";
+    function nextPage(pageNum) {
+        document.getElementById(`page${currentPage}`).classList.remove('active');
+        currentPage = pageNum;
+        document.getElementById(`page${currentPage}`).classList.add('active');
+        startTimer(); // تجديد الوقت 5 دقائق فوراً للصفحة الجديدة
+    }
 
-function goToPage3() {{
-    // تجهيز صفحة الفراغات ديناميكياً وحفظ الشافل ومكان الفراغين في كل مرة يتم فيها ريفريش
-    let words = originalTopic.split(" ");
-    if (words.length >= 3) {{
-        // اختيار دليلين عشوائيين مختلفين للفراغات
-        let idx1 = Math.floor(Math.random() * words.length);
-        let idx2 = Math.floor(Math.random() * words.length);
-        while (idx1 === idx2) {{
-            idx2 = Math.floor(Math.random() * words.length);
-        }}
+    // جافاسكريبت الصفحة الأولى لضمان الاسم الثلاثي
+    function goToPage2() {
+        const nameInput = document.getElementById('user-fullname').value.trim();
+        const words = nameInput.split(/\s+/);
+        if (nameInput === "" || words.length < 3) {
+            document.getElementById('p1-error').style.display = 'block';
+            return;
+        }
+        document.getElementById('p1-error').style.display = 'none';
+        userName = nameInput;
+        nextPage(2);
+    }
 
-        word1Correct = words[idx1].replace(/[.,\/#!$%\^&\*;:{{}}=\-_`~()]/g,"");
-        word2Correct = words[idx2].replace(/[.,\/#!$%\^&\*;:{{}}=\-_`~()]/g,"");
+    // جافاسكريبت الصفحة الثالثة: إنتاج عينات الفراغات المفتوحة ديناميكياً وشافول موضع الفراغين
+    let blankWords = [];
+    function setupPage3Blank() {
+        const words = topicText.split(' ');
+        if (words.length <= 4) {
+            // تأمين الحسابات إن كان العنوان قصير جداً بشكل استثنائي
+            blankWords = [0, 1];
+        } else {
+            // اختيار دليلين عشوائيين ومتباعدين للفراغات لمنع تداخل الكلمات المتلاصقة
+            let idx1 = Math.floor(Math.random() * (words.length / 2));
+            let idx2 = Math.floor(Math.random() * (words.length / 2)) + Math.floor(words.length / 2);
+            if (idx1 === idx2) idx2 = words.length - 1;
+            blankWords = [idx1, idx2];
+        }
 
-        let containerHTML = "";
-        for (let i = 0; i < words.length; i++) {{
-            if (i === idx1) {{
-                containerHTML += ` <input type="text" id="blank1" class="blank-input"> `;
-            } else if (i === idx2) {{
-                containerHTML += ` <input type="text" id="blank2" class="blank-input"> `;
-            } else {{
-                containerHTML += words[i] + " ";
-            }}
-        }}
-        document.getElementById("fillBlanksContainer").innerHTML = containerHTML;
-    }} else {{
-        // في حال كانت الكلمات قصيرة جداً
-        document.getElementById("fillBlanksContainer").innerHTML = `العنوان: ${{originalTopic}} <br><input type="text" id="blank1" class="blank-input" placeholder="اكتب العنوان كاملاً هنا">`;
-        word1Correct = originalTopic;
-        word2Correct = "";
-    }}
+        let htmlMarkup = "";
+        words.forEach((word, idx) => {
+            if (blankWords.includes(idx)) {
+                htmlMarkup += `<input type="text" class="blank-input" id="blank-${idx}" data-correct="${word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"")}" placeholder="؟؟"> `;
+            } else {
+                htmlMarkup += `<span>${word}</span> `;
+            }
+        });
+        document.getElementById('blank-container').innerHTML = htmlMarkup;
+    }
 
-    switchPage("page3");
-}}
+    function validatePage3() {
+        let allCorrect = true;
+        blankWords.forEach(idx => {
+            const inputEl = document.getElementById(`blank-${idx}`);
+            const userVal = inputEl.value.trim().toLowerCase();
+            const correctVal = inputEl.getAttribute('data-correct').toLowerCase();
+            if (userVal !== correctVal) {
+                allCorrect = false;
+            }
+        });
 
-// الصفحة 3
-function validateAndGoToPage4() {{
-    let b1 = document.getElementById("blank1") ? document.getElementById("blank1").value.trim() : "";
-    let b2 = document.getElementById("blank2") ? document.getElementById("blank2").value.trim() : "";
+        if (!allCorrect) {
+            document.getElementById('p3-error').style.display = 'block';
+            return;
+        }
+        document.getElementById('p3-error').style.display = 'none';
+        nextPage(4);
+    }
 
-    let isB1Correct = (b1.toLowerCase() === word1Correct.toLowerCase());
-    let isB2Correct = (word2Correct === "" ? true : (b2.toLowerCase() === word2Correct.toLowerCase()));
+    // شفل ومزج المصفوفات بشكل مرن
+    function shuffleArray(arr) {
+        return arr.sort(() => Math.random() - 0.5);
+    }
 
-    if (isB1Correct && isB2Correct) {{
-        document.getElementById("page3Error").style.display = "none";
-        // بناء وتجهيز شاشة الصفحة الرابعة: سؤال تمهيدي (وهو السؤال الثالث من داتا تيكست)
-        buildPage4Question();
-        switchPage("page4");
-    }} else {{
-        document.getElementById("page3Error").style.display = "block";
-    }}
-}}
+    // الصفحة الرابعة: تهيئة السؤال التمهيدي (رقم 3 في الداتا تيكست دائمًا)
+    let q3Data = quizData.find(q => q.id === 3);
+    function setupPage4Pre() {
+        document.getElementById('q3-title-p4').innerText = q3Data.question;
+        let shuffledOpts = shuffleArray([...q3Data.options]);
+        let html = "";
+        shuffledOpts.forEach(opt => {
+            html += `<div class="option-card" onclick="selectOption(this, 3, '${opt}')">${opt}</div>`;
+        });
+        document.getElementById('q3-options-p4').innerHTML = html;
+    }
 
-// الصفحة 4
-function buildPage4Question() {{
-    let q3 = rawQuestionsData.find(q => q.id === 3);
-    // عمل شافل محلي مخصص للخيارات عند البناء
-    let shuffChoices = shuffleArray([...q3.choices]);
+    function selectOption(element, qId, selectedVal) {
+        // إزالة الكلاس المحدد من باقي خيارات نفس المجموعة السؤالية لإتاحة الاختيار الانسيابي الكبير
+        const parent = element.parentElement;
+        const cards = parent.getElementsByClassName('option-card');
+        for (let card of cards) {
+            card.classList.remove('selected');
+        }
+        element.classList.add('selected');
+        userAnswers[qId] = selectedVal;
+    }
 
-    let html = `<div class="question-block">
-        <p style="font-size:18px; font-weight:bold;">${{q3.question}}</p>
-        <div class="choices-container">`;
-    shuffChoices.forEach(choice => {{
-        html += `<div class="choice-card" onclick="selectOption(3, '${{choice.replace(/'/g, "\'")}}', this)">${{choice}}</div>`;
-    }});
-    html += `</div></div>`;
-    document.getElementById("preliminaryQuestionContainer").innerHTML = html;
-}}
+    function submitPage4() {
+        if (!userAnswers[3]) {
+            alert("الرجاء اختيار خيار قبل مواصلة الاختبار.");
+            return;
+        }
+        if (userAnswers[3] === q3Data.correct) {
+            q3PreCorrect = true;
+        } else {
+            q3PreCorrect = false;
+        }
+        // بناء وتجهيز صفحة الأسئلة الكاملة بناء على نتيجة هذا التمهيدي فوراً
+        setupPage6Full();
+        nextPage(5);
+    }
 
-function selectOption(qId, val, element) {{
-    // إزالة التحديد السابق من خيارات نفس السؤال
-    let siblings = element.parentNode.querySelectorAll('.choice-card');
-    siblings.forEach(node => node.classList.remove('selected'));
-    // إضافة تحديد للعنصر الحالي الناقر
-    element.classList.add('selected');
-    selectedAnswers[qId] = val;
-}}
+    // بناء وتوليد الصفحة السادسة ديناميكياً وشافول الخيارات لكل سؤال بالكامل
+    function setupPage6Full() {
+        let container = document.getElementById('full-questions-container');
+        container.innerHTML = "";
 
-function goToPage5() {{
-    let q3 = rawQuestionsData.find(q => q.id === 3);
-    if (selectedAnswers[3] === q3.correct) {{
-        isQuestion3CorrectInPage4 = true;
-    }} else {{
-        isQuestion3CorrectInPage4 = false;
-    }}
-    switchPage("page5");
-}}
+        quizData.forEach(q => {
+            // شرط أساسي: إذا أجاب على السؤال الثالث صحيحاً تمهيدياً يتم استثناؤه واستبعاده من القائمة هنا
+            if (q.id === 3 && q3PreCorrect) return;
 
-// الصفحة 5
-function goToPage6() {{
-    buildPage6Questions();
-    switchPage("page6");
-}}
+            let qBlock = document.createElement('div');
+            qBlock.style.marginBottom = "30px";
+            qBlock.innerHTML = `<p style="font-size:16px; font-weight:bold; color:#ffcc00;">${q.id}. ${q.question}</p>`;
 
-// الصفحة 6
-function buildPage6Questions() {{
-    let html = "";
-    rawQuestionsData.forEach(q => {{
-        // الشرط: إذا تمت إجابة السؤال الثالث صحيحاً تمهيدياً يتم استثناؤه واستبعاده من العرض، عدا ذلك يعرض كاملاً
-        if (q.id === 3 && isQuestion3CorrectInPage4) {{
-            return; 
-        }}
-        let shuffChoices = shuffleArray([...q.choices]);
-        html += `<div class="question-block">
-            <p style="font-size:17px; font-weight:bold;">${{q.question}}</p>
-            <div class="choices-container">`;
-        shuffChoices.forEach(choice => {{
-            html += `<div class="choice-card" onclick="selectOption(${{q.id}}, '${{choice.replace(/'/g, "\'")}}', this)">${{choice}}</div>`;
-        }});
-        html += `</div></div>`;
-    }});
-    document.getElementById("mainQuestionsContainer").innerHTML = html;
-}}
+            let shuffledOpts = shuffleArray([...q.options]);
+            shuffledOpts.forEach(opt => {
+                qBlock.innerHTML += `<div class="option-card" onclick="selectOption(this, ${q.id}, '${opt}')">${opt}</div>`;
+            });
+            container.appendChild(qBlock);
+        });
+    }
 
-function processPage6Answers() {{
-    wrongQuestionIds = [];
-    rawQuestionsData.forEach(q => {{
-        if (q.id === 3 && isQuestion3CorrectInPage4) {{
-            return; // تخطي لأنه صحيح مسبقاً
-        }}
-        if (selectedAnswers[q.id] !== q.correct) {{
-            wrongQuestionIds.push(q.id);
-        }}
-    }});
+    function submitPage6() {
+        wrongOnPage6 = [];
+        let totalAnsweredNeeded = 0;
 
-    if (wrongQuestionIds.length > 0) {{
-        // هناك بعض الإجابات الخاطئة، نذهب للصفحة 7 لإعادة التكرار والدعم الاستماعي والمحاولة الأخيرة
-        switchPage("page7");
-    }} else {{
-        // جميع الإجابات صحيحة تماماً نذهب مباشرة لصفحة النتيجة 9
-        showFinalResultPage();
-    }}
-}}
+        quizData.forEach(q => {
+            if (q.id === 3 && q3PreCorrect) return;
+            totalAnsweredNeeded++;
 
-// الصفحة 7 تنتقل بسلاسة إلى الصفحة 8
-function goToPage8() {{
-    buildPage8Questions();
-    switchPage("page8");
-}}
+            if (!userAnswers[q.id] || userAnswers[q.id] !== q.correct) {
+                wrongOnPage6.push(q.id); // إضافة معرّف السؤال الخاطئ لقائمة المراجعة والتكرار
+            }
+        });
 
-// الصفحة 8: تكرار الأسئلة الخاطئة فقط كمحاولة أخيرة وتعديل الإجابة
-function buildPage8Questions() {{
-    let html = "";
-    rawQuestionsData.forEach(q => {{
-        if (wrongQuestionIds.includes(q.id)) {{
-            let shuffChoices = shuffleArray([...q.choices]);
-            html += `<div class="question-block">
-                <p style="font-size:17px; font-weight:bold;">${{q.question}}</p>
-                <div class="choices-container">`;
-            shuffChoices.forEach(choice => {{
-                html += `<div class="choice-card" onclick="selectOption(${{q.id}}, '${{choice.replace(/'/g, "\'")}}', this)">${{choice}}</div>`;
-            }});
-            html += `</div></div>`;
-        }}
-    }});
-    document.getElementById("reviewQuestionsContainer").innerHTML = html;
-}}
+        // تحقق من الإجابة على كل الأسئلة الظاهرة أولاً لضمان سلاسة التدريب
+        let keysCount = Object.keys(userAnswers).filter(k => q3PreCorrect ? k != 3 : true).length;
 
-function processPage8Answers() {{
-    // معالجة وحساب المحاولة الأخيرة وإرسالها للنتيجة مباشرة
-    showFinalResultPage();
-}}
+        if (wrongOnPage6.length === 0) {
+            // كل الاجابات صحيحة، تخطي مباشرة لصفحة النتيجة النهائية دون تكرار
+            showFinalResult();
+        } else {
+            // يوجد أخطاء، الانتقال للصفحة السابعة (تكرار الملف الصوتي والمحاولة الأخيرة بالثامنة)
+            setupPage8Wrongs();
+            nextPage(7);
+        }
+    }
 
-// الصفحة 9: الحساب والترسية النهائية الكاملة وعرض النتائج والتوقيت الدقيق
-function showFinalResultPage() {{
-    clearInterval(timerInterval);
-    document.getElementById("timerContainer").style.display = "none";
+    // تهيئة الصفحة الثامنة لبناء محاولة أخيرة للأسئلة الخاطئة فقط
+    function setupPage8Wrongs() {
+        let container = document.getElementById('wrong-questions-container');
+        container.innerHTML = "";
 
-    let finalScore = 0;
-    rawQuestionsData.forEach(q => {{
-        if (q.id === 3 && isQuestion3CorrectInPage4) {{
-            finalScore++;
-        }} else if (selectedAnswers[q.id] === q.correct) {{
-            finalScore++;
-        }}
-    }});
+        quizData.forEach(q => {
+            if (wrongOnPage6.includes(q.id)) {
+                let qBlock = document.createElement('div');
+                qBlock.style.marginBottom = "30px";
+                qBlock.innerHTML = `<p style="font-size:16px; font-weight:bold; color:#ffcc00;">${q.id}. ${q.question}</p>`;
 
-    document.getElementById("resName").innerText = userName;
-    document.getElementById("resScore").innerText = finalScore;
+                let shuffledOpts = shuffleArray([...q.options]);
+                shuffledOpts.forEach(opt => {
+                    // سيتم إعادة تحديث الإجابة عند النقر بالمحاولة الأخيرة
+                    qBlock.innerHTML += `<div class="option-card" onclick="selectOption(this, ${q.id}, '${opt}')">${opt}</div>`;
+                });
+                container.appendChild(qBlock);
+            }
+        });
+    }
 
-    let now = new Date();
-    document.getElementById("resTimestamp").innerText = now.toLocaleString('ar-EG', {{ hour12: true }});
+    function submitPage8() {
+        // فحص النتيجة النهائية الشاملة بعد انتهاء المحاولة الأخيرة بالكامل
+        showFinalResult();
+    }
 
-    switchPage("page9");
-}}
+    function showFinalResult() {
+        clearInterval(timerInterval);
 
-// إطلاق التوقيت للصفحة الأولى عند بدء التشغيل والتحميل
-window.onload = function() {{
-    startPageTimer();
-}};
+        // احتساب الحصيلة النهائية من 5 درجات للأسئلة الـ 5 المعتمدة بالداتا تيكست
+        let finalScore = 0;
+        quizData.forEach(q => {
+            if (userAnswers[q.id] && userAnswers[q.id] === q.correct) {
+                finalScore++;
+            }
+        });
+
+        document.getElementById('res-name').innerText = userName;
+        document.getElementById('res-score').innerText = finalScore;
+
+        // جلب وضخ تاريخ اليوم والانتهاء بشكل تلقائي من المتصفح محلياً
+        const now = new Date();
+        document.getElementById('res-date').innerText = now.toLocaleString('ar-SA', { hour12: true });
+
+        nextPage(9);
+    }
 </script>
 
 </body>
