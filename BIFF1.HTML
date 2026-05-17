@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اختبار الفلاش كارد التفاعلي</title>
+    <style>
+        :root {
+            --bg-color: rgba(0, 0, 0, 0.6);
+            --primary-color: #FFD700;
+            --text-color: #FFFFFF;
+        }
+        * {
+            box-sizing: border-box;
+            -webkit-text-size-adjust: none;
+            touch-action: manipulation;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            background: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+            position: relative;
+            border-left: 2px solid var(--primary-color);
+            border-right: 2px solid var(--primary-color);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+        .timer {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        .card {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            font-size: 20px;
+            line-height: 1.6;
+        }
+        .page {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .page.active {
+            display: flex;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: 2px solid var(--primary-color);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 18px;
+            border-radius: 8px;
+            outline: none;
+            text-align: center;
+        }
+        .btn {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: #000;
+            border: none;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background 0.3s;
+        }
+        .btn:active {
+            background-color: #e6c200;
+        }
+        .self-eval {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn-eval {
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .correct { background-color: #2ecc71; color: white; }
+        .wrong { background-color: #e74c3c; color: white; }
+        .partially { background-color: #f39c12; color: white; }
+        .answer-box {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            border: 1px dashed var(--primary-color);
+            width: 100%;
+        }
+        .error-msg {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <div id="page-title">الاختبار الفلاشي</div>
+        <div class="timer" id="timer-display">05:00</div>
+    </div>
+
+    <!-- الصفحة 1: الاسم الثلاثي الزامي -->
+    <div id="page-1" class="page active">
+        <div class="card">
+            <p>الرجاء إدخال الاسم الثلاثي لبدء الاختبار</p>
+            <input type="text" id="user-name" placeholder="الاسم الثلاثي المكتمل" required>
+            <div id="name-error" class="error-msg">الرجاء إدخال الاسم الثلاثي بشكل صحيح وبدون أرقام!</div>
+        </div>
+        <button class="btn" onclick="validateAndGoToPage2()">ابدأ الاختبار</button>
+    </div>
+
+    <!-- الصفحة 2: عرض عنوان الموضوع -->
+    <div id="page-2" class="page">
+        <div class="card">
+            <h3>عنوان القسم الحالي:</h3>
+            <p id="topic-title-p"></p>
+        </div>
+        <button class="btn" onclick="nextPage(3)">التالي</button>
+    </div>
+
+    <!-- الصفحة 3: نفس العنوان مع فراغين عشوائيين يتغيران بكل ريفريش -->
+    <div id="page-3" class="page">
+        <div class="card">
+            <h3>أكمل الفراغات في عنوان القسم:</h3>
+            <p id="topic-blanks-p" style="font-weight: bold; color: var(--primary-color);"></p>
+        </div>
+        <button class="btn" onclick="nextPage(4)">التالي</button>
+    </div>
+
+    <!-- الصفحة 4: سؤال املا الفراغ النصي الإجباري للانتقال -->
+    <div id="page-4" class="page">
+        <div class="card">
+            <h3>سؤال إدخال نصي إلزامي:</h3>
+            <p id="p4-question-text"></p>
+            <input type="text" id="p4-user-answer" placeholder="اكتب الإجابة الصحيحة هنا">
+            <div id="p4-error" class="error-msg">الإجابة غير صحيحة، يرجى المحاولة مجدداً للانتقال!</div>
+        </div>
+        <button class="btn" onclick="validatePage4()">التحقق والانتقال لصفحة 5</button>
+    </div>
+
+    <!-- الصفحات من 5 إلى 14: الأسئلة التفاعلية العشرة -->
+    
+    <!-- صفحة السؤال رقم 5 التقييمي الذاتي -->
+    <div id="page-5" class="page">
+        <div class="card">
+            <h3>السؤال رقم 1</h3>
+            <p>البائع: نعم ولكن يختلف واكثر المشترين اعجبهم كثيرا .  -Yes, but it's different, and _____ _____ liked it very much.</p>
+
+            <button class="btn" style="background:#555; color:#fff; font-size:15px; padding:10px;" onclick="toggleAnswer(5)">إظهار / إخفاء الإجابة النموذجية</button>
+
+            <div id="ans-box-5" class="answer-box">
+                <span style="color: var(--primary-color); font-weight:bold;">الإجابة الصحيحة:</span> most buyers
+            </div>
+        </div>
+
+        <div class="self-eval">
+            <p style="font-size:14px; margin:0; text-align:center; color:#ccc;">قيم إجابتك ذاتياً للانتقال للسؤال التالي:</p>
+            <button class="btn-eval correct" onclick="recordEvaluation(5, 'correct')">صح (ممتازة)</button>
+            <button class="btn-eval partially" onclick="recordEvaluation(5, 'partially')">إلى حد ما</button>
+            <button class="btn-eval wrong" onclick="recordEvaluation(5, 'wrong')">خطأ / لم أعرفها</button>
+        </div>
+    </div>
+        
+    <!-- صفحة السؤال رقم 6 التقييمي الذاتي -->
+    <div id="page-6" class="page">
+        <div class="card">
+            <h3>السؤال رقم 2</h3>
+            <p>حيدر : حسنا ولكني افضل القديم لما هذا الجيل الجديد والفارق بسيط  . Okay, but I _____ the old one why this new generation when the difference is so _____ ?</p>
+
+            <button class="btn" style="background:#555; color:#fff; font-size:15px; padding:10px;" onclick="toggleAnswer(6)">إظهار / إخفاء الإجابة النموذجية</button>
+
+            <div id="ans-box-6" class="answer-box">
+                <span style="color: var(--primary-color); font-weight:bold;">الإجابة الصحيحة:</span> prefer Small
+            </div>
+        </div>
+
+        <div class="self-eval">
+            <p style="font-size:14px; margin:0; text-align:center; color:#ccc;">قيم إجابتك ذاتياً للانتقال للسؤال التالي:</p>
+            <button class="btn-eval correct" onclick="recordEvaluation(6, 'correct')">صح (ممتازة)</button>
+            <button class="btn-eval partially" onclick="recordEvaluation(6, 'partially')">إلى حد ما</button>
+            <button class="btn-eval wrong" onclick="recordEvaluation(6, 'wrong')">خطأ / لم أعرفها</button>
+        </div>
+    </div>
+        
+    <!-- صفحة السؤال رقم 7 التقييمي الذاتي -->
+    <div id="page-7" class="page">
+        <div class="card">
+            <h3>السؤال رقم 3</h3>
+            <p>حيدر : انظر وقارن الانزيمات الهاضمة اليست نفسها من ناحية النوعية والكمية ؟  Look _____ and _____ the digestive enzymes. Aren't they the same in _____ of type and quantity?</p>
+
+            <button class="btn" style="background:#555; color:#fff; font-size:15px; padding:10px;" onclick="toggleAnswer(7)">إظهار / إخفاء الإجابة النموذجية</button>
+
+            <div id="ans-box-7" class="answer-box">
+                <span style="color: var(--primary-color); font-weight:bold;">الإجابة الصحيحة:</span> compare terms
+            </div>
+        </div>
+
+        <div class="self-eval">
+            <p style="font-size:14px; margin:0; text-align:center; color:#ccc;">قيم إجابتك ذاتياً للانتقال للسؤال التالي:</p>
+            <button class="btn-eval correct" onclick="recordEvaluation(7, 'correct')">صح (ممتازة)</button>
+            <button class="btn-eval partially" onclick="recordEvaluation(7, 'partially')">إلى حد ما</button>
+            <button class="btn-eval wrong" onclick="recordEvaluation(7, 'wrong')">خطأ / لم أعرفها</button>
+        </div>
+    </div>
+        
+
+    <!-- الصفحة 15: عرض الإجابات الخاطئة فقط كمرحلة ثانية -->
+    <div id="page-15" class="page">
+        <div class="card" style="justify-content: flex-start; overflow-y: auto; height: 70vh;">
+            <h3>مراجعة الأسئلة الخاطئة (المرحلة الثانية)</h3>
+            <div id="wrong-questions-review" style="text-align: right; width: 100%;"></div>
+        </div>
+        <button class="btn" onclick="showFinalResults()">عرض النتيجة النهائية</button>
+    </div>
+
+    <!-- الصفحة الأخيرة: النتيجة والتوثيق -->
+    <div id="page-final" class="page">
+        <div class="card">
+            <h3>تم الانتهاء من الاختبار بنجاح 🎉</h3>
+            <p id="final-user-name" style="font-weight: bold;"></p>
+            <p style="font-size: 24px;">النتيجة الكاملة المعتمدة: <span id="score-display" style="color: var(--primary-color); font-weight: bold;"></span> من 5</p>
+            <hr style="width: 100%; border-color: rgba(255,255,255,0.1);">
+            <p id="completion-date" style="font-size: 14px; color: #bbb;"></p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let currentPage = 1;
+    let timerInterval = null;
+    let timeLeft = 300; 
+    let userName = "";
+
+    // بيانات الأسئلة الخاصة بهذا الملف المستدعى
+    const dataset = [{"q": "البائع: نعم ولكن يختلف واكثر المشترين اعجبهم كثيرا .  -Yes, but it's different, and _____ _____ liked it very much.", "ans": "most buyers"}, {"q": "حيدر : حسنا ولكني افضل القديم لما هذا الجيل الجديد والفارق بسيط  . Okay, but I _____ the old one why this new generation when the difference is so _____ ?", "ans": "prefer Small"}, {"q": "حيدر : انظر وقارن الانزيمات الهاضمة اليست نفسها من ناحية النوعية والكمية ؟  Look _____ and _____ the digestive enzymes. Aren't they the same in _____ of type and quantity?", "ans": "compare terms"}];
+    const topicText = "دليل إجراءات الاستقبال والتسجيل والتعامل مع المراجعين ";
+
+    // توليد الفراغات العشوائية لصفحة 3 عند تحميل الصفحة أو عمل ريفريش
+    function generateTopicBlanks() {
+        let words = topicText.trim().split(/\s+/);
+        if (words.length >= 3) {
+            let idx1 = Math.floor(Math.random() * words.length);
+            let idx2 = Math.floor(Math.random() * words.length);
+            while (idx1 === idx2) {
+                idx2 = Math.floor(Math.random() * words.length);
+            }
+            words[idx1] = " (......) ";
+            words[idx2] = " (......) ";
+        }
+        document.getElementById("topic-blanks-p").innerText = words.join(" ");
+    }
+
+    // إدارة المؤقت المتجدد لكل صفحة (5 دقائق)
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 300; 
+        updateTimerDisplay();
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("انتهى وقت هذه الصفحة! سيتم نقلك تلقائياً.");
+                if (currentPage === 4) {
+                    // صفحة 4 إجبارية الكتابة، إن انتهى الوقت نضع الإجابة الصحيحة للتسهيل وننقل
+                    document.getElementById("p4-user-answer").value = dataset[0].ans;
+                    validatePage4();
+                } else if (currentPage >= 5 && currentPage <= 14) {
+                    recordEvaluation(currentPage, 'wrong');
+                } else {
+                    let next = currentPage + 1;
+                    if(currentPage === 15) next = 'final';
+                    nextPage(next);
+                }
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        document.getElementById("timer-display").innerText = 
+            (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
+    }
+
+    // الصفحة الأولى: التحقق من الاسم الثلاثي
+    function validateAndGoToPage2() {
+        let nameInput = document.getElementById("user-name").value.trim();
+        let nameWords = nameInput.split(/\s+/).filter(w => w.length > 0);
+        if (nameWords.length < 3) {
+            document.getElementById("name-error").style.display = "block";
+            return;
+        }
+        document.getElementById("name-error").style.display = "none";
+        userName = nameInput;
+        document.getElementById("topic-title-p").innerText = topicText;
+        generateTopicBlanks();
+
+        // إعداد سؤال صفحة 4 المأخوذ من السؤال الأول بالمجموعة
+        document.getElementById("p4-question-text").innerText = dataset[0].q;
+
+        nextPage(2);
+    }
+
+    // الانتقال السلس للصفحات وتجديد المؤقت
+    function nextPage(pageId) {
+        document.getElementById(`page-${currentPage}`).classList.remove("active");
+        currentPage = pageId;
+
+        let targetPage = document.getElementById(`page-${pageId}`);
+        if (targetPage) {
+            targetPage.classList.add("active");
+        }
+
+        // تعديل الهيدر والعناوين حسب الصفحة
+        if (pageId === 1) {
+            document.getElementById("page-title").innerText = "تسجيل الدخول";
+        } else if (pageId === 2 || pageId === 3) {
+            document.getElementById("page-title").innerText = "مقدمة القسم الآلي";
+        } else if (pageId === 4) {
+            document.getElementById("page-title").innerText = "سؤال الكتابة الإلزامي";
+        } else if (pageId >= 5 && pageId <= 14) {
+            document.getElementById("page-title").innerText = `السؤال التقييمي الأصلي (${pageId - 4} / 10)`;
+        } else if (pageId === 15) {
+            document.getElementById("page-title").innerText = "المرحلة الثانية الخاطئة";
+            buildWrongReview();
+        } else if (pageId === 'final') {
+            document.getElementById("page-title").innerText = "النتيجة النهائية";
+            document.getElementById("timer-display").innerText = "--:--";
+            clearInterval(timerInterval);
+            return;
+        }
+
+        startTimer();
+    }
+
+    // الصفحة الرابعة: التحقق الإجباري من الإجابة النصية للكتابة
+    function validatePage4() {
+        let userAns = document.getElementById("p4-user-answer").value.trim().toLowerCase();
+        let correctAns = dataset[0].ans.trim().toLowerCase();
+
+        if (userAns === correctAns || userAns.includes(correctAns) || correctAns.includes(userAns) && userAns.length > 1) {
+            document.getElementById("p4-error").style.display = "none";
+            nextPage(5);
+        } else {
+            document.getElementById("p4-error").style.display = "block";
+        }
+    }
+
+    // وظائف صفحات الأسئلة الذاتية (5 إلى 14)
+    function toggleAnswer(pageIndex) {
+        let box = document.getElementById(`ans-box-${pageIndex}`);
+        if (box.style.display === "block") {
+            box.style.display = "none";
+        } else {
+            box.style.display = "block";
+        }
+    }
+
+    let evaluations = {}; // لحفظ درجات التقييم الذاتي للأسئلة العشرة
+
+    function recordEvaluation(pageIndex, status) {
+        // حفظ التقييم: صح = 1، إلى حد ما = 0.5، خطأ = 0
+        if (status === 'correct') evaluations[pageIndex] = 1;
+        else if (status === 'partially') evaluations[pageIndex] = 0.5;
+        else evaluations[pageIndex] = 0;
+
+        let next = pageIndex + 1;
+        nextPage(next);
+    }
+
+    // صفحة 15: بناء مراجعة الأسئلة الخاطئة والي حد ما فقط كمرحلة ثانية
+    function buildWrongReview() {
+        let container = document.getElementById("wrong-questions-review");
+        container.innerHTML = "";
+        let wrongCount = 0;
+
+        for (let p = 5; p <= 14; p++) {
+            if (evaluations[p] === 0 || evaluations[p] === 0.5) {
+                wrongCount++;
+                let qIndex = p - 5;
+                let item = dataset[qIndex];
+                container.innerHTML += `
+                    <div style="background: rgba(231, 76, 60, 0.1); padding: 12px; margin-bottom: 10px; border-radius: 6px; border-right: 4px solid #e74c3c;">
+                        <p><strong>س:</strong> ${item.q}</p>
+                        <p style="color: var(--primary-color);"><strong>الإجابة الصحيحة المعتمدة:</strong> ${item.ans}</p>
+                    </div>
+                `;
+            }
+        }
+
+        if (wrongCount === 0) {
+            container.innerHTML = "<p style='text-align:center; color:#2ecc71;'>ممتاز! لم تخطئ في أي سؤال بالتقييم الذاتي الحالي.</p>";
+        }
+    }
+
+    // عرض النتيجة النهائية المحتسبة من 5 وتاريخ الانتهاء
+    function showFinalResults() {
+        let totalScore = 0;
+        for (let p = 5; p <= 14; p++) {
+            totalScore += (evaluations[p] || 0);
+        }
+        // تحويل النتيجة لتكون من 5 درجات كحد أقصى (لأن عدد الأسئلة المتاحة بالملف 10)
+        let finalScoreFromFive = (totalScore / 10) * 5;
+
+        document.getElementById("final-user-name").innerText = "المتدرب/ـة: " + userName;
+        document.getElementById("score-display").innerText = finalScoreFromFive.toFixed(1);
+
+        let now = new Date();
+        document.getElementById("completion-date").innerText = "تاريخ ووقت الانتهاء من الاختبار: " + now.toLocaleString('ar-SA');
+
+        nextPage('final');
+    }
+
+    // تشغيل المؤقت فور فتح التطبيق بالبداية لصفحة الاسم
+    startTimer();
+</script>
+
+</body>
+</html>

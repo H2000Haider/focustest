@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>فلاش كارد - نظام الاختبار</title>
+    <style>
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: #000000; display: flex; justify-content: center; align-items: center;
+        }
+        /* الألوان المطلوبة: أسود 60%، أصفر 30%، أبيض مركزي طولي وثابت الحجم والزوم */
+        .main-container {
+            width: 600px; height: 750px; background-color: #1a1a1a; 
+            border: 5px solid #ffcc00; border-radius: 15px; display: flex;
+            flex-direction: column; padding: 25px; color: #ffffff; position: relative;
+        }
+        input[type="text"] {
+            font-size: 16px !important; padding: 12px; border: 2px solid #ffcc00;
+            background-color: #000000; color: #ffffff; border-radius: 8px; width: 100%;
+            text-align: center; outline: none;
+        }
+        .header-panel { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333333; padding-bottom: 10px; }
+        .timer-box { background-color: #ffcc00; color: #000000; padding: 6px 15px; border-radius: 20px; font-weight: bold; }
+        .page-indicator { color: #ffcc00; font-weight: bold; }
+        .content-area { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .page { display: none; width: 100%; height: 100%; flex-direction: column; justify-content: center; align-items: center; }
+        .page.active { display: flex; }
+        .topic-title { font-size: 22px; color: #ffffff; border: 2px dashed #ffcc00; padding: 20px; border-radius: 10px; text-align: center; }
+        .flashcard { background-color: #222222; border: 2px solid #ffcc00; border-radius: 12px; padding: 25px; width: 100%; min-height: 200px; display: flex; justify-content: center; align-items: center; font-size: 18px; margin-bottom: 20px; text-align: center; }
+        .btn-action { background-color: #ffcc00; color: #000000; border: none; padding: 14px 35px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 80%; }
+        .self-eval-buttons { display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 15px; }
+        .btn-eval { padding: 12px 20px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; flex: 1; color: #000000; }
+        .btn-correct { background-color: #2ecc71; }
+        .btn-partial { background-color: #f1c40f; }
+        .btn-wrong { background-color: #e74c3c; }
+        .answer-box { background-color: #111111; border: 1px solid #555; color: #ffcc00; padding: 15px; border-radius: 8px; width: 100%; margin-top: 15px; display: none; font-weight: bold; text-align: center; }
+        .blank-space { display: inline-block; border-bottom: 2px solid #ffcc00; min-width: 80px; color: #ffcc00; }
+        .wrong-review-item { background: #2a1a1a; border: 1px solid #e74c3c; padding: 10px; margin-bottom: 10px; border-radius: 6px; width: 100%; text-align: right; }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="header-panel">
+        <div class="page-indicator" id="pageIndicator">الصفحة 1 / 15</div>
+        <div class="timer-box" id="timerDisplay">05:00</div>
+    </div>
+
+    <div class="content-area">
+        <div class="page active" id="page1">
+            <h2 style="color:#ffcc00">إدخال الاسم الثلاثي إلزامي للبدء</h2>
+            <div style="width: 80%; margin-bottom: 30px;">
+                <input type="text" id="fullNameInput" placeholder="اكتب الاسم الثلاثي هنا...">
+            </div>
+            <button class="btn-action" onclick="submitNamePage()">التالي</button>
+        </div>
+
+        <div class="page" id="page2">
+            <h2 style="color:#ffcc00">عنوان الموضوع الحالي</h2>
+            <div class="topic-title" id="topicDisplayPage2"></div>
+            <div style="margin-top:40px; width:100%; text-align:center;">
+                <button class="btn-action" onclick="goToPage(3)">التالي</button>
+            </div>
+        </div>
+
+        <div class="page" id="page3">
+            <h2 style="color:#ffcc00">عنوان الموضوع بالفراغات العشوائية</h2>
+            <div class="topic-title" id="topicDisplayPage3"></div>
+            <div style="margin-top:40px; width:100%; text-align:center;">
+                <button class="btn-action" onclick="goToPage(4)">التالي</button>
+            </div>
+        </div>
+
+        <div class="page" id="page4">
+            <h2 style="color:#ffcc00">سؤال إملاء الفراغ (كتابة)</h2>
+            <div class="flashcard" id="q4Text"></div>
+            <div style="width: 80%; margin-bottom: 20px;">
+                <input type="text" id="q4Input" placeholder="اكتب الإجابة المطلوبة الصحيحة...">
+            </div>
+            <button class="btn-action" onclick="submitPage4()">التحقق والانتقال</button>
+        </div>
+
+        <div class="page" id="dynamicQuestionsPage">
+            <h2 id="dynPageTitle" style="color:#ffcc00">التقييم الذاتي</h2>
+            <div class="flashcard" id="dynQuestionText"></div>
+            <button class="btn-action" id="btnShowAnswer" onclick="showDynamicAnswer()">إظهار الإجابة</button>
+            <div class="answer-box" id="dynAnswerBox"></div>
+            <div class="self-eval-buttons" id="evalButtonsArea" style="display:none;">
+                <button class="btn-eval btn-correct" onclick="handleSelfEval('correct')">صح</button>
+                <button class="btn-eval btn-partial" onclick="handleSelfEval('partial')">إلى حد ما</button>
+                <button class="btn-eval btn-wrong" onclick="handleSelfEval('wrong')">خطأ</button>
+            </div>
+        </div>
+
+        <div class="page" id="page15">
+            <h2 style="color:#ffcc00">الأسئلة المجاب عليها بشكل خاطئ فقط</h2>
+            <div id="wrongQuestionsContainer" style="width:100%; max-height:350px; overflow-y:auto; margin-bottom:20px;"></div>
+            <button class="btn-action" onclick="finishExam()">إنهاء وعرض النتيجة</button>
+        </div>
+
+        <div class="page" id="resultPage">
+            <h2 style="color:#ffcc00">النتيجة الإجمالية للاختبار</h2>
+            <div class="topic-title" style="text-align:right; font-size:18px;">
+                <p><strong>الاسم:</strong> <span id="resFullName" style="color:#ffcc00"></span></p>
+                <p><strong>النتيجة النهائية:</strong> <span id="resScore" style="color:#ffcc00"></span> / 5</p>
+                <p><strong>تاريخ الانتهاء:</strong> <span id="resDate" style="color:#ffcc00"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const origTopic = "إدارة مواعيد فحوصات الأشعة المختلفة والتعامل مع التأخير";
+    const dataset = [{"question": "أين يقع فرع الأشعة في الدمام؟ يقع على طريق الأمير محمد بن فهد (الشارع _____) مقابل مجمع _____ مول الشهير", "answer": "الأول الشاطئ"}, {"question": "كم يبلغ سعر فحص الرنين ؟\n How much does an MRI scan _____ ?", "answer": "COST"}, {"question": "ما الذي يجب سؤاله للمريض للتأكد من دقة الفحص المطلوب؟ ج : يجب سؤاله: \"هل لديك أوراق من المستشفى أو _____ لمعرفة الفحص بدقة ؟\".", "answer": "المستوصف"}, {"question": "كم يستغرق ظهور تقرير فحص الأشعة بعد الانتهاء منه؟ ج: لا ينتهي التقرير فوراً، بل يستغرق عادةً من يوم إلى عمل _____ بعد الفحص", "answer": "يومين"}, {"question": "كيف يتم التعامل مع مريض الرنين الذي تأخر نصف ساعة عن موعده ويوجد أمامه 3 مرضى؟ ج: يتم إبلاغه بأنه سيفحص بعد انتهاء المرضى الثلاثة الذين حضروا قبله، ويتم (_____) الموعد في النظام .", "answer": "(تعديل)"}, {"question": "كيف يتم التعامل مع مريض الأشعة المقطعية سي تي الذي تأخر نصف ساعة عن موعده ويوجد أمامه 3 مرضى؟ ج: يتم إبلاغه أيضاً بأن فحصه سيكون بعد انتهاء المرضى الثلاثة الموجودين ب _____ د على الاقصى، ويتم تعديل الموعد في _____", "answer": "30"}, {"question": "ما هي أسباب عدم ظهور اسم شركة التأمين الفرعي في النظام؟ ج: يعود ذلك لعدم تطابق البيانات، أو في حال كان المريض تابعاً لتعاقد مستشفى الدوحة حيث يوجد _____ مختلفين.", "answer": "كودين"}, {"question": "لماذا لا تجد اسم شركة التامين التعاونية ؟ لان مكتوبه _____ _____ ", "answer": "بالعربي انجليزي"}, {"question": "لماذا نطبع ورقة التامين نسختين؟ لان تلصق واحدة منهم مع _____", "answer": "الفاتورة"}, {"question": "لماذا نكتب كاش على الفاتروة اذا تم الدفع كاش ؟ لان في مدى توجد _____ اما الكاش لا يوجد _____", "answer": "ايصال"}];
+    let currentPage = 1, timerInterval = null, timeLeft = 300;
+    let studentName = "", selfEvalScores = [], wrongQuestionsIndices = [], currentDynQuestionIdx = 0;
+
+    window.onload = function() {
+        startTimer();
+        setupPage3Topic();
+        document.getElementById("q4Text").innerText = dataset[0].question;
+    };
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 300;
+        document.getElementById("timerDisplay").innerText = "05:00";
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            let mins = Math.floor(timeLeft / 60), secs = timeLeft % 60;
+            document.getElementById("timerDisplay").innerText = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
+            if (timeLeft <= 0) { autoAdvance(); }
+        }, 1000);
+    }
+
+    function setupPage3Topic() {
+        let words = origTopic.split(" ");
+        if (words.length >= 3) {
+            let idx1 = Math.floor(Math.random() * words.length), idx2 = Math.floor(Math.random() * words.length);
+            while(idx1 === idx2) { idx2 = Math.floor(Math.random() * words.length); }
+            let masked = [...words];
+            masked[idx1] = "<span class='blank-space'>______</span>";
+            masked[idx2] = "<span class='blank-space'>______</span>";
+            document.getElementById("topicDisplayPage3").innerHTML = masked.join(" ");
+        } else {
+            document.getElementById("topicDisplayPage3").innerHTML = origTopic + " <span class='blank-space'>__</span> <span class='blank-space'>__</span>";
+        }
+        document.getElementById("topicDisplayPage2").innerText = origTopic;
+    }
+
+    function submitNamePage() {
+        let input = document.getElementById("fullNameInput").value.trim();
+        if(input === "" || input.split(" ").length < 3) { alert("الاسم الثلاثي إلزامي!"); return; }
+        studentName = input; goToPage(2);
+    }
+
+    function submitPage4() {
+        let userAns = document.getElementById("q4Input").value.trim().toLowerCase();
+        let correctAns = dataset[0].answer.trim().toLowerCase();
+        if(userAns === correctAns) { currentDynQuestionIdx = 0; goToPage(5); } 
+        else { alert("الادخال غير صحيح للانتقال! الإجابة هي: " + dataset[0].answer); }
+    }
+
+    function loadDynamicQuestion() {
+        document.getElementById("dynPageTitle").innerText = "صفحة السؤال رقم " + (currentDynQuestionIdx + 5) + " (تقييم ذاتي)";
+        document.getElementById("dynQuestionText").innerText = dataset[currentDynQuestionIdx].question;
+        document.getElementById("dynAnswerBox").innerText = "الاجابة الصحيحة: " + dataset[currentDynQuestionIdx].answer;
+        document.getElementById("dynAnswerBox").style.display = "none";
+        document.getElementById("evalButtonsArea").style.display = "none";
+        document.getElementById("btnShowAnswer").style.display = "block";
+    }
+
+    function showDynamicAnswer() {
+        document.getElementById("dynAnswerBox").style.display = "block";
+        document.getElementById("evalButtonsArea").style.display = "flex";
+        document.getElementById("btnShowAnswer").style.display = "none";
+    }
+
+    function handleSelfEval(status) {
+        selfEvalScores.push(status);
+        if(status === 'wrong') wrongQuestionsIndices.push(currentDynQuestionIdx);
+        if(currentDynQuestionIdx < 9) { currentDynQuestionIdx++; currentPage++; goToPage(currentPage); } 
+        else { goToPage(15); }
+    }
+
+    function goToPage(pageNum) {
+        currentPage = pageNum;
+        document.getElementById("pageIndicator").innerText = "الصفحة " + currentPage + " / 15";
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        startTimer();
+
+        if(pageNum === 1) document.getElementById("page1").classList.add('active');
+        else if(pageNum === 2) document.getElementById("page2").classList.add('active');
+        else if(pageNum === 3) document.getElementById("page3").classList.add('active');
+        else if(pageNum === 4) document.getElementById("page4").classList.add('active');
+        else if(pageNum >= 5 && pageNum <= 14) { document.getElementById("dynamicQuestionsPage").classList.add('active'); loadDynamicQuestion(); }
+        else if(pageNum === 15) {
+            document.getElementById("page15").classList.add('active');
+            let container = document.getElementById("wrongQuestionsContainer"); container.innerHTML = "";
+            if(wrongQuestionsIndices.length === 0) container.innerHTML = "لا يوجد أسئلة خاطئة!";
+            else {
+                wrongQuestionsIndices.forEach(i => {
+                    container.innerHTML += `<div class='wrong-review-item'><strong>السؤال:</strong> ${dataset[i].question}<br><span style='color:#ffcc00'><strong>الإجابة:</strong> ${dataset[i].answer}</span></div>`;
+                });
+            }
+        }
+    }
+
+    function autoAdvance() {
+        if(currentPage === 4) { currentDynQuestionIdx = 0; goToPage(5); }
+        else if(currentPage >= 5 && currentPage <= 14) handleSelfEval('wrong');
+        else if(currentPage === 15) finishExam();
+        else goToPage(currentPage + 1);
+    }
+
+    function finishExam() {
+        clearInterval(timerInterval);
+        document.getElementById("pageIndicator").innerText = "النتيجة";
+        document.getElementById("timerDisplay").innerText = "--:--";
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById("resultPage").classList.add('active');
+
+        let correct = selfEvalScores.filter(s => s==='correct').length;
+        let partial = selfEvalScores.filter(s => s==='partial').length;
+        let finalScore = ((correct + (partial * 0.5)) / 10) * 5;
+
+        document.getElementById("resFullName").innerText = studentName;
+        document.getElementById("resScore").innerText = finalScore.toFixed(2);
+        document.getElementById("resDate").innerText = new Date().toLocaleString('ar-EG');
+    }
+</script>
+</body>
+</html>
