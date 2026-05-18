@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الاختبار</title>
+    <style>
+        body {
+            background-color: #121212; 
+            color: #ffffff; 
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; 
+            touch-action: pan-x pan-y;
+        }
+        .card {
+            background-color: #000000;
+            border: 2px solid #FFD700; 
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-sizing: border-box;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        input[type="text"] {
+            background-color: #1a1a1a;
+            color: #FFD700;
+            border: 1px solid #FFD700;
+            padding: 12px;
+            margin: 10px 0;
+            width: 100%;
+            font-size: 16px; 
+            box-sizing: border-box;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .inline-input {
+            width: 100px !important;
+            display: inline-block;
+            margin: 0 5px !important;
+        }
+        button {
+            background-color: #FFD700; 
+            color: #000000; 
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.8; }
+        .btn-group button { margin-top: 10px; }
+        .hidden { display: none !important; }
+        .timer-container {
+            position: absolute;
+            top: 20px;
+            font-size: 18px;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        h2 { font-size: 20px; line-height: 1.5; color: #ffffff; }
+        p { font-size: 18px; line-height: 1.6; white-space: pre-wrap; }
+        .answer-text { color: #FFD700; font-weight: bold; font-size: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="timer-container hidden" id="timerBox">الوقت المتبقي: <span id="timerText">05:00</span></div>
+
+    <!-- الصفحة الأولى -->
+    <div id="page1" class="card">
+        <input type="text" id="fullName" placeholder="أدخل اسمك الثلاثي">
+        <button onclick="submitName()">دخول</button>
+    </div>
+
+    <!-- الصفحة الثانية -->
+    <div id="page2" class="card hidden">
+        <h2 id="topicTitle"></h2>
+        <button onclick="showPage3()">التالي</button>
+    </div>
+
+    <!-- الصفحة الثالثة -->
+    <div id="page3" class="card hidden">
+        <p id="topicBlanks"></p>
+        <button onclick="checkBlanks()">تحقق وانتقل للأسئلة</button>
+    </div>
+
+    <!-- صفحة الأسئلة -->
+    <div id="pageQuiz" class="card hidden">
+        <p id="questionText"></p>
+        <button id="btnShowAnswer" onclick="showAnswer()">إظهار الإجابة</button>
+        <p id="answerText" class="answer-text hidden"></p>
+        <div id="evalButtons" class="btn-group hidden">
+            <button onclick="evalQuestion('correct')">❤️ صح</button>
+            <button onclick="evalQuestion('somewhat')">🤔 إلى حد ما</button>
+            <button onclick="evalQuestion('wrong')">❌ خطأ</button>
+        </div>
+    </div>
+
+    <!-- صفحة النتيجة -->
+    <div id="pageResult" class="card hidden">
+        <h2>النتيجة النهائية</h2>
+        <p id="finalScore"></p>
+        <p id="finishDate"></p>
+    </div>
+
+    <script>
+        const topic = "إدارة مواعيد فحوصات الأشعة المختلفة والتعامل مع التأخير ";
+        const questionsList = ["أين يقع فرع الأشعة في الدمام؟ يقع على طريق الأمير محمد بن فهد (الشارع _____) مقابل مجمع _____ مول الشهير", "كم يبلغ سعر فحص الرنين ؟\n How much does an MRI scan _____ ?", "ما الذي يجب سؤاله للمريض للتأكد من دقة الفحص المطلوب؟ ج : يجب سؤاله: \"هل لديك أوراق من المستشفى أو _____ لمعرفة الفحص بدقة ؟\".", "كم يستغرق ظهور تقرير فحص الأشعة بعد الانتهاء منه؟ ج: لا ينتهي التقرير فوراً، بل يستغرق عادةً عمل _____ بعد الفحص", "كيف يتم التعامل مع مريض الرنين الذي تأخر نصف ساعة عن موعده ويوجد أمامه 3 مرضى؟ ج: يتم إبلاغه بأنه سيفحص بعد انتهاء المرضى الثلاثة الذين حضروا قبله، ويتم _____ الموعد في النظام .", "كيف يتم التعامل مع مريض الأشعة المقطعية سي تي الذي تأخر نصف ساعة عن موعده؟ ج: يتم إبلاغه بأن فحصه سيكون بعد انتهاء المرضى بـ _____ د على الاقصى، ويتم تعديل الموعد في النظام.", "ما هي أسباب عدم ظهور اسم شركة التأمين الفرعي في النظام؟ ج: يعود ذلك لعدم تطابق البيانات، حيث يوجد _____ مختلفين.", "لماذا لا تجد اسم شركة التامين التعاونية ؟ لان مكتوبه باللغة _____ واللغة _____ ", "لماذا نطبع ورقة التامين نسختين؟ لان تلصق واحدة منهم مع _____", "لماذا نكتب كاش على الفاتروة اذا تم الدفع كاش ؟ لان في مدى يوجد _____ اما الكاش لا يوجد له _____"];
+        const answersList = ["الأول الشاطئ", "COST", "المستوصف", "يومين", "(تعديل)", "30", "كودين", "بالعربي انجليزي", "الفاتورة", "ايصال"];
+
+        let currentQIndex = 0;
+        let score = 0;
+        let wrongQuestions = [];
+        let isRetryPhase = false;
+
+        let timerInterval;
+        let timeLeft = 300; 
+        let blankWords = [];
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 300;
+            updateTimerDisplay();
+            document.getElementById('timerBox').classList.remove('hidden');
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    autoSkip();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            let m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            let s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerText').innerText = m + ':' + s;
+        }
+
+        function resetAndStartTimer() {
+            startTimer();
+        }
+
+        function autoSkip() {
+            if (!document.getElementById('page2').classList.contains('hidden')) showPage3();
+            else if (!document.getElementById('page3').classList.contains('hidden')) checkBlanks(true);
+            else if (!document.getElementById('pageQuiz').classList.contains('hidden')) evalQuestion('wrong');
+        }
+
+        function switchView(viewId) {
+            ['page1', 'page2', 'page3', 'pageQuiz', 'pageResult'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(viewId).classList.remove('hidden');
+            if(viewId !== 'page1' && viewId !== 'pageResult') resetAndStartTimer();
+            if(viewId === 'pageResult') document.getElementById('timerBox').classList.add('hidden');
+        }
+
+        function submitName() {
+            let nameVal = document.getElementById('fullName').value.trim();
+            if (nameVal.split(' ').length < 3) {
+                alert('الرجاء إدخال الاسم الثلاثي');
+                return;
+            }
+            document.getElementById('topicTitle').innerText = topic;
+            switchView('page2');
+        }
+
+        function showPage3() {
+            let words = topic.trim().split(/\s+/);
+            let idx1, idx2;
+
+            do {
+                idx1 = Math.floor(Math.random() * words.length);
+                idx2 = Math.floor(Math.random() * words.length);
+            } while (Math.abs(idx1 - idx2) <= 1 || idx1 === idx2);
+
+            blankWords = [
+                { id: 'b1', word: words[idx1] },
+                { id: 'b2', word: words[idx2] }
+            ];
+
+            words[idx1] = '<input type="text" id="b1" class="inline-input">';
+            words[idx2] = '<input type="text" id="b2" class="inline-input">';
+
+            document.getElementById('topicBlanks').innerHTML = words.join(' ');
+            switchView('page3');
+        }
+
+        function checkBlanks(force = false) {
+            if (force) {
+                startQuiz();
+                return;
+            }
+            let val1 = document.getElementById('b1').value.trim();
+            let val2 = document.getElementById('b2').value.trim();
+            if (val1 === blankWords[0].word && val2 === blankWords[1].word) {
+                startQuiz();
+            } else {
+                alert('الإجابة غير صحيحة، حاول مجدداً!');
+            }
+        }
+
+        function startQuiz() {
+            currentQIndex = 0;
+            score = 0;
+            wrongQuestions = [];
+            isRetryPhase = false;
+            showQuestion();
+            switchView('pageQuiz');
+        }
+
+        function showQuestion() {
+            resetAndStartTimer();
+            document.getElementById('answerText').classList.add('hidden');
+            document.getElementById('evalButtons').classList.add('hidden');
+            document.getElementById('btnShowAnswer').classList.remove('hidden');
+
+            let qText = isRetryPhase ? wrongQuestions[currentQIndex].q : questionsList[currentQIndex];
+            document.getElementById('questionText').innerText = qText;
+        }
+
+        function showAnswer() {
+            document.getElementById('btnShowAnswer').classList.add('hidden');
+            document.getElementById('answerText').classList.remove('hidden');
+            document.getElementById('evalButtons').classList.remove('hidden');
+
+            let aText = isRetryPhase ? wrongQuestions[currentQIndex].a : answersList[currentQIndex];
+            document.getElementById('answerText').innerText = aText;
+        }
+
+        /* التعديل الجوهري هنا لحساب الإجابات الصحيحة في المحاولة الثانية */
+        function evalQuestion(status) {
+            if (!isRetryPhase) {
+                // المرحلة الأولى
+                if (status === 'correct') {
+                    score++;
+                } else {
+                    wrongQuestions.push({
+                        q: questionsList[currentQIndex],
+                        a: answersList[currentQIndex]
+                    });
+                }
+                currentQIndex++;
+            } else {
+                // المرحلة الثانية (إعادة الأسئلة الخاطئة فقط)
+                if (status === 'correct') {
+                    score++; // إضافة الدرجة للنتيجة من 10 إذا أصبحت صحيحة بالمرحلة الثانية
+                }
+                currentQIndex++;
+            }
+
+            // التحكم بالانتقال بين المراحل
+            if (!isRetryPhase) {
+                if (currentQIndex < questionsList.length) {
+                    showQuestion();
+                } else {
+                    if (wrongQuestions.length > 0) {
+                        isRetryPhase = true;
+                        currentQIndex = 0;
+                        alert('انتهت المرحلة الأولى. سيتم الآن إعادة الأسئلة الخاطئة.');
+                        showQuestion();
+                    } else {
+                        showResult();
+                    }
+                }
+            } else {
+                if (currentQIndex < wrongQuestions.length) {
+                    showQuestion();
+                } else {
+                    showResult();
+                }
+            }
+        }
+
+        function showResult() {
+            clearInterval(timerInterval);
+            document.getElementById('finalScore').innerText = score + " / 10";
+            document.getElementById('finishDate').innerText = new Date().toLocaleString('ar-SA');
+            switchView('pageResult');
+        }
+    </script>
+</body>
+</html>
